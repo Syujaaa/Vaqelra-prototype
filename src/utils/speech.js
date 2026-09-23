@@ -17,7 +17,7 @@ export function createRecognizer({ onInterim, onFinal, onEnd, onError } = {}) {
   const recognizer = new Ctor();
   recognizer.lang = "en-US";
   recognizer.interimResults = true;
-  recognizer.continuous = false;
+  recognizer.continuous = true;
   recognizer.maxAlternatives = 1;
 
   recognizer.onresult = (event) => {

@@ -92,6 +92,7 @@ export default function Session() {
 
   const recognizerRef = useRef(null);
   const finalTextRef = useRef("");
+  const shouldContinueListeningRef = useRef(false);
   const fallbackTimerRef = useRef(null);
   const turnRef = useRef(turn);
   const speechSupported = isRecognitionSupported();
@@ -118,6 +119,7 @@ export default function Session() {
   // Cleanup mic / voice / timers on unmount.
   useEffect(() => {
     return () => {
+      shouldContinueListeningRef.current = false;
       recognizerRef.current?.stop();
       stopSpeaking();
       if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
@@ -154,6 +156,12 @@ export default function Session() {
         setTurn((t) => (t === "ai" ? "awaiting" : t));
       }, estimateSpeakingMs(text));
     }
+  }
+
+  function stopAiSpeech() {
+    stopSpeaking();
+    if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
+    setTurn((currentTurn) => (currentTurn === "ai" ? "awaiting" : currentTurn));
   }
 
   function startSession() {
@@ -205,17 +213,23 @@ export default function Session() {
     stopSpeaking();
     finalTextRef.current = "";
     setLiveText("");
+    shouldContinueListeningRef.current = true;
 
     const recognizer = createRecognizer({
-      onInterim: (text) => setLiveText(text),
+      onInterim: (text) => setLiveText(`${finalTextRef.current} ${text}`.trim()),
       onFinal: (text) => {
         finalTextRef.current = `${finalTextRef.current} ${text}`.trim();
-        setLiveText("");
+        setLiveText(finalTextRef.current);
       },
       onEnd: () => {
+        if (shouldContinueListeningRef.current && turnRef.current === "listening") {
+          recognizer.start();
+          return;
+        }
         if (turnRef.current === "listening") finalizeAnswer(finalTextRef.current);
       },
       onError: (err) => {
+        shouldContinueListeningRef.current = false;
         setTurn("awaiting");
         setMicError(
           err === "not-allowed"
@@ -235,6 +249,7 @@ export default function Session() {
   }
 
   function stopListening() {
+    shouldContinueListeningRef.current = false;
     recognizerRef.current?.stop();
   }
 
@@ -250,6 +265,7 @@ export default function Session() {
   }
 
   function endCallEarly() {
+    shouldContinueListeningRef.current = false;
     stopSpeaking();
     recognizerRef.current?.stop();
     if (history.length === 0) {
@@ -293,14 +309,19 @@ export default function Session() {
             {voiceSupported && (
               <button
                 onClick={() =>
-                  setVoiceOn((v) => {
-                    if (v) stopSpeaking();
-                    return !v;
-                  })
+                  turn === "ai"
+                    ? stopAiSpeech()
+                    : setVoiceOn((v) => !v)
                 }
-                className="inline-flex items-center gap-1.5 text-xs text-ivory/50 hover:text-ivory border border-ink-800 rounded-md px-2.5 py-1.5"
+                className={`inline-flex items-center gap-1.5 text-xs border rounded-md px-2.5 py-1.5 ${
+                  turn === "ai"
+                    ? "text-amber border-amber/50 hover:bg-amber/10"
+                    : "text-ivory/50 border-ink-800 hover:text-ivory"
+                }`}
+                title={turn === "ai" ? "Klik untuk berhenti berbicara" : voiceOn ? "Nonaktifkan suara" : "Aktifkan suara"}
               >
-                {voiceOn ? <Volume2 size={13} /> : <VolumeX size={13} />}
+                {turn === "ai" ? <Square size={13} /> : voiceOn ? <Volume2 size={13} /> : <VolumeX size={13} />}
+                {turn === "ai" && "Klik untuk berhenti"}
               </button>
             )}
           </div>

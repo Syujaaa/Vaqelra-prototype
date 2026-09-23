@@ -41,6 +41,7 @@ export function AppProvider({ children }) {
         xpToNextLevel = Math.round(xpToNextLevel * 1.25);
       }
       const session = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         scenarioId,
         world,
         date: new Date().toISOString().slice(0, 10),
@@ -59,6 +60,16 @@ export function AppProvider({ children }) {
     return true;
   }
 
+  function deleteSession(sessionId) {
+    setProgress((prev) => ({
+      ...prev,
+      completedSessions: prev.completedSessions.filter((session, index) => {
+        const currentId = session.id || `legacy-${index}`;
+        return currentId !== sessionId;
+      }),
+    }));
+  }
+
   function resetProgress() {
     setProgress({ ...defaultProgress, completedSessions: [] });
   }
@@ -73,7 +84,7 @@ export function AppProvider({ children }) {
     return counts;
   }, [progress.completedSessions]);
 
-  const value = { progress, recordSession, resetProgress, mistakeFrequency };
+  const value = { progress, recordSession, deleteSession, resetProgress, mistakeFrequency };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }

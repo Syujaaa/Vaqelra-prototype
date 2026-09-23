@@ -1,9 +1,9 @@
 import { useApp } from "../context/AppContext";
 import mistakeTags from "../data/mistakeTags.json";
-import { Flame, Target, RotateCcw } from "lucide-react";
+import { Flame, Target, RotateCcw, Trash2 } from "lucide-react";
 
 export default function Dashboard() {
-  const { progress, resetProgress, mistakeFrequency } = useApp();
+  const { progress, deleteSession, resetProgress, mistakeFrequency } = useApp();
 
   const xpPct = Math.round((progress.xp / progress.xpToNextLevel) * 100);
   const topMistakes = Object.entries(mistakeFrequency).sort((a, b) => b[1] - a[1]);
@@ -59,13 +59,24 @@ export default function Dashboard() {
               const avg = Math.round(
                 (s.scores.grammar + s.scores.vocabulary + s.scores.pronunciation + s.scores.fluency) / 4
               );
+              const sessionId = s.id || `legacy-${i}`;
               return (
-                <div key={i} className="flex items-center justify-between rounded-md border border-ink-800 bg-ink-900 px-4 py-3">
+                <div key={sessionId} className="flex items-center justify-between gap-3 rounded-md border border-ink-800 bg-ink-900 px-4 py-3">
                   <div>
                     <p className="text-sm">{s.world}</p>
                     <p className="text-[11px] text-ivory/45">{s.date}</p>
                   </div>
-                  <span className="font-display text-lg text-teal">{avg}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="font-display text-lg text-teal">{avg}</span>
+                    <button
+                      onClick={() => deleteSession(sessionId)}
+                      className="w-8 h-8 grid place-items-center rounded-md text-ivory/35 hover:text-flag hover:bg-flag/10"
+                      title="Hapus sesi dari riwayat"
+                      aria-label={`Hapus sesi ${s.world}`}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </div>
               );
             })}
