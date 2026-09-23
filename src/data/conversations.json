@@ -1,0 +1,199 @@
+{
+  "campus-presentation": {
+    "character": "Dr. Amelia Cross",
+    "characterRole": "Dosen Pembimbing",
+    "opening": "Good morning! Are you ready to present your project today?",
+    "steps": [
+      {
+        "id": 1,
+        "options": [
+          { "text": "Yes, I've prepared everything and I'm ready to start whenever you are.", "quality": "strong" },
+          { "text": "Yes, I ready since yesterday.", "quality": "weak", "tag": "tense" },
+          { "text": "Yes.", "quality": "weak", "tag": "short-answer" }
+        ],
+        "aiReply": "Great, take your seat at the front. Can you tell me what your project is about?"
+      },
+      {
+        "id": 2,
+        "options": [
+          { "text": "My project is about a mobile app that helps students practice English speaking through real-life simulations.", "quality": "strong" },
+          { "text": "Is about app for practice speaking.", "quality": "weak", "tag": "grammar" },
+          { "text": "It's an app. For speaking. English speaking.", "quality": "ok", "tag": "repetition" }
+        ],
+        "aiReply": "That sounds interesting. What problem does it solve for students?"
+      },
+      {
+        "id": 3,
+        "options": [
+          { "text": "Many students are afraid of making mistakes, so they rarely get a chance to practice speaking with a real partner.", "quality": "strong" },
+          { "text": "Ummm... students... they scared... to talk...", "quality": "weak", "tag": "pause" },
+          { "text": "Students don't have partner for practice speaking.", "quality": "ok", "tag": "tense" }
+        ],
+        "aiReply": "Good point. Last question — how would you measure whether the app is actually working?"
+      },
+      {
+        "id": 4,
+        "options": [
+          { "text": "We'd track their fluency, grammar accuracy, and confidence over time, and compare it to their starting level.", "quality": "strong" },
+          { "text": "We check if they good or not good.", "quality": "weak", "tag": "grammar" },
+          { "text": "By... survey, I think, and maybe test.", "quality": "ok", "tag": "pause" }
+        ],
+        "aiReply": "Well done. That was a clear and confident presentation overall."
+      }
+    ]
+  },
+  "job-interview": {
+    "character": "Michael Tan",
+    "characterRole": "HR Manager, Nexora Tech",
+    "opening": "Thanks for coming in today. Can you start by telling me a little about yourself?",
+    "steps": [
+      {
+        "id": 1,
+        "options": [
+          { "text": "Sure. I'm a final-year Computer Science student with a strong interest in AI and product design.", "quality": "strong" },
+          { "text": "I am student. I study computer.", "quality": "weak", "tag": "short-answer" },
+          { "text": "I'm... a student, and I like technology, and, um, also design.", "quality": "ok", "tag": "pause" }
+        ],
+        "aiReply": "Nice. Why are you interested in working with us specifically?"
+      },
+      {
+        "id": 2,
+        "options": [
+          { "text": "I've followed your product for a while, and I admire how you balance user experience with strong engineering.", "quality": "strong" },
+          { "text": "Because your company is good and famous.", "quality": "weak", "tag": "vocabulary" },
+          { "text": "I like your company, it's good company for me I think.", "quality": "ok", "tag": "repetition" }
+        ],
+        "aiReply": "Good answer. Now, tell me about a time you faced a difficult problem and how you solved it."
+      },
+      {
+        "id": 3,
+        "options": [
+          { "text": "During my final project, our AI model kept failing, so I broke the problem down and tested each part separately until I found the bug.", "quality": "strong" },
+          { "text": "One time project is broken, I fix it slowly.", "quality": "weak", "tag": "tense" },
+          { "text": "There was a problem... it was hard... but I solved.", "quality": "ok", "tag": "pause" }
+        ],
+        "aiReply": "That's a solid example. Last one — where do you see yourself in three years?"
+      },
+      {
+        "id": 4,
+        "options": [
+          { "text": "I'd like to grow into a role where I lead small projects and mentor newer engineers.", "quality": "strong" },
+          { "text": "I want to be manager or something big maybe.", "quality": "ok", "tag": "vocabulary" },
+          { "text": "I don't know, maybe still working here.", "quality": "weak", "tag": "short-answer" }
+        ],
+        "aiReply": "Thank you, that gives me a clear picture. We'll be in touch soon."
+      }
+    ]
+  },
+  "airport-checkin": {
+    "character": "Grace Whitfield",
+    "characterRole": "Petugas Check-in, Heathrow Airport",
+    "opening": "Good afternoon! May I see your passport and booking confirmation, please?",
+    "steps": [
+      {
+        "id": 1,
+        "options": [
+          { "text": "Of course, here you go. I'm flying to Manchester this afternoon.", "quality": "strong" },
+          { "text": "Here. I go Manchester.", "quality": "weak", "tag": "tense" },
+          { "text": "Yes, yes, here passport.", "quality": "weak", "tag": "short-answer" }
+        ],
+        "aiReply": "Perfect, thank you. Would you like a window or an aisle seat?"
+      },
+      {
+        "id": 2,
+        "options": [
+          { "text": "A window seat would be great, thank you.", "quality": "strong" },
+          { "text": "Window. Window seat.", "quality": "ok", "tag": "repetition" },
+          { "text": "I don't care, any is okay for me.", "quality": "ok", "tag": "vocabulary" }
+        ],
+        "aiReply": "Great choice. Do you have any bags to check in today?"
+      },
+      {
+        "id": 3,
+        "options": [
+          { "text": "Yes, just this one suitcase. It's about eighteen kilograms.", "quality": "strong" },
+          { "text": "Yes one bag, is heavy maybe.", "quality": "ok", "tag": "grammar" },
+          { "text": "Bag... yes... one.", "quality": "weak", "tag": "pause" }
+        ],
+        "aiReply": "That's within the limit. Here's your boarding pass — gate 22, boarding starts at 3:40."
+      },
+      {
+        "id": 4,
+        "options": [
+          { "text": "Thank you so much, have a great day!", "quality": "strong" },
+          { "text": "Thanks you too.", "quality": "ok", "tag": "grammar" },
+          { "text": "Okay bye.", "quality": "weak", "tag": "short-answer" }
+        ],
+        "aiReply": "You too, safe travels!"
+      }
+    ]
+  },
+  "new-friend": {
+    "character": "Jordan Reyes",
+    "characterRole": "Peserta Meetup",
+    "opening": "Hey, I don't think we've met — I'm Jordan. How do you know people here?",
+    "steps": [
+      {
+        "id": 1,
+        "options": [
+          { "text": "Hi Jordan, I'm new actually — a friend of mine invited me to check out the community.", "quality": "strong" },
+          { "text": "I don't know people, my friend invite me.", "quality": "ok", "tag": "grammar" },
+          { "text": "Friend. He invite.", "quality": "weak", "tag": "short-answer" }
+        ],
+        "aiReply": "Nice, welcome then! What do you do?"
+      },
+      {
+        "id": 2,
+        "options": [
+          { "text": "I'm studying computer science, and I'm actually building an app for language learning right now.", "quality": "strong" },
+          { "text": "I study computer, and make app also.", "quality": "ok", "tag": "tense" },
+          { "text": "Study... and app... something like that.", "quality": "weak", "tag": "pause" }
+        ],
+        "aiReply": "That's cool! What made you want to build that?"
+      },
+      {
+        "id": 3,
+        "options": [
+          { "text": "Honestly, I struggled a lot with speaking English confidently, so I wanted to build the tool I wish I had.", "quality": "strong" },
+          { "text": "Because I bad at speaking before, so I make this.", "quality": "ok", "tag": "grammar" },
+          { "text": "I don't know, just an idea, maybe.", "quality": "weak", "tag": "vocabulary" }
+        ],
+        "aiReply": "That's a great reason. We should exchange contacts — I'd love to try it sometime."
+      }
+    ]
+  },
+  "client-negotiation": {
+    "character": "Isabelle Moreau",
+    "characterRole": "VP Partnerships, Meridian Capital",
+    "opening": "Thanks for meeting me. Walk me through why your platform is worth our investment.",
+    "steps": [
+      {
+        "id": 1,
+        "options": [
+          { "text": "Our platform gives learners a private, judgment-free space to practice speaking, which most competitors don't offer.", "quality": "strong" },
+          { "text": "Our app is good because people can practice speaking without other people.", "quality": "ok", "tag": "vocabulary" },
+          { "text": "Is app for speaking, very good app.", "quality": "weak", "tag": "grammar" }
+        ],
+        "aiReply": "Interesting. What's your plan for monetization?"
+      },
+      {
+        "id": 2,
+        "options": [
+          { "text": "We're running a freemium model, with a paid tier and institutional licensing for schools and companies.", "quality": "strong" },
+          { "text": "We have free and paid version, and also for school.", "quality": "ok", "tag": "repetition" },
+          { "text": "Free, paid... school also can use.", "quality": "weak", "tag": "short-answer" }
+        ],
+        "aiReply": "And how do you plan to acquire your first users?"
+      },
+      {
+        "id": 3,
+        "options": [
+          { "text": "We'll start with campus ambassadors and English clubs, then expand through word-of-mouth and shareable achievement cards.", "quality": "strong" },
+          { "text": "We ask student to promote, and maybe social media too.", "quality": "ok", "tag": "tense" },
+          { "text": "Marketing... campus... something like this.", "quality": "weak", "tag": "pause" }
+        ],
+        "aiReply": "This has real potential. Send over your deck and we'll schedule a follow-up."
+      }
+    ]
+  }
+}

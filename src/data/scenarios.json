@@ -1,0 +1,57 @@
+[
+  {
+    "id": "campus-life",
+    "world": "Campus Life",
+    "role": "Dosen & teman kuliah",
+    "tagline": "Presentasi tugas, diskusi kelompok, dan obrolan di kantin kampus internasional.",
+    "location": "Ruang Kelas 204, Global State University",
+    "difficulty": "Beginner",
+    "estMinutes": 8,
+    "accent": "teal",
+    "missionId": "campus-presentation"
+  },
+  {
+    "id": "first-job",
+    "world": "First Job",
+    "role": "HRD & rekan kerja",
+    "tagline": "Interview kerja, onboarding hari pertama, dan rapat kecil dengan atasan.",
+    "location": "Lobi Kantor Nexora Tech",
+    "difficulty": "Intermediate",
+    "estMinutes": 10,
+    "accent": "amber",
+    "missionId": "job-interview"
+  },
+  {
+    "id": "travel-adventure",
+    "world": "Travel Adventure",
+    "role": "Petugas bandara & orang asing",
+    "tagline": "Check-in bandara, tanya arah, dan basa-basi dengan sesama traveler.",
+    "location": "Terminal 3, Heathrow Airport",
+    "difficulty": "Beginner",
+    "estMinutes": 6,
+    "accent": "teal",
+    "missionId": "airport-checkin"
+  },
+  {
+    "id": "social-life",
+    "world": "Social Life",
+    "role": "Teman baru",
+    "tagline": "Kenalan di acara komunitas dan menjaga obrolan tetap mengalir.",
+    "location": "Rooftop Meetup, Brooklyn",
+    "difficulty": "Beginner",
+    "estMinutes": 7,
+    "accent": "flag",
+    "missionId": "new-friend"
+  },
+  {
+    "id": "business-world",
+    "world": "Business World",
+    "role": "Klien & partner bisnis",
+    "tagline": "Negosiasi kontrak dan menjelaskan produk kepada calon klien.",
+    "location": "Ruang Rapat, Meridian Capital",
+    "difficulty": "Advanced",
+    "estMinutes": 12,
+    "accent": "amber",
+    "missionId": "client-negotiation"
+  }
+]

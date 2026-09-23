@@ -1,0 +1,44 @@
+[
+  {
+    "id": "free",
+    "name": "FREE",
+    "price": "Rp0",
+    "period": "selamanya",
+    "features": [
+      "5 menit speaking per hari",
+      "1 dunia virtual",
+      "Feedback grammar dasar",
+      "Progress sederhana"
+    ],
+    "cta": "Mulai gratis"
+  },
+  {
+    "id": "pro",
+    "name": "PRO",
+    "price": "Rp49.000",
+    "period": "/ bulan",
+    "highlight": true,
+    "features": [
+      "Speaking lebih panjang, tanpa batas harian ketat",
+      "Semua dunia simulasi",
+      "AI Memory of Your Mistakes",
+      "Personal learning path",
+      "Pronunciation feedback mendalam",
+      "Laporan perkembangan mingguan"
+    ],
+    "cta": "Upgrade ke Pro"
+  },
+  {
+    "id": "institution",
+    "name": "INSTITUTION",
+    "price": "B2B",
+    "period": "lisensi tahunan",
+    "features": [
+      "Dashboard peserta",
+      "Kelas speaking terkelola",
+      "Laporan evaluasi kelompok",
+      "Pengelolaan akun institusi"
+    ],
+    "cta": "Hubungi kami"
+  }
+]

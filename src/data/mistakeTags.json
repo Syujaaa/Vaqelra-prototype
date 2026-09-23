@@ -1,0 +1,26 @@
+{
+  "tense": {
+    "label": "Tense kurang tepat",
+    "detail": "Beberapa jawaban tercampur antara present dan past tense."
+  },
+  "grammar": {
+    "label": "Struktur kalimat belum lengkap",
+    "detail": "Subjek atau kata kerja bantu (be/do) sering hilang di kalimat."
+  },
+  "short-answer": {
+    "label": "Jawaban terlalu singkat",
+    "detail": "Jawaban satu atau dua kata membuat percakapan terasa terputus."
+  },
+  "repetition": {
+    "label": "Pengulangan kosakata",
+    "detail": "Kata yang sama diulang alih-alih memakai sinonim atau kalimat penuh."
+  },
+  "pause": {
+    "label": "Jeda terlalu lama",
+    "detail": "Beberapa jawaban menunjukkan keraguan dengan banyak jeda dan 'umm'."
+  },
+  "vocabulary": {
+    "label": "Pilihan kosakata umum",
+    "detail": "Kosakata yang dipakai masih sangat umum, belum spesifik ke konteks."
+  }
+}
