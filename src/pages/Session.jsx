@@ -116,6 +116,15 @@ export default function Session() {
     turnRef.current = turn;
   }, [turn]);
 
+  useEffect(() => {
+    if (!showTranscript) return undefined;
+    function closeOnEscape(event) {
+      if (event.key === "Escape") setShowTranscript(false);
+    }
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [showTranscript]);
+
   // Cleanup mic / voice / timers on unmount.
   useEffect(() => {
     return () => {
@@ -129,7 +138,7 @@ export default function Session() {
   if (!scenario || !script) {
     return (
       <div className="max-w-2xl mx-auto px-5 py-20 text-center">
-        <p className="text-ivory/70">Skenario tidak ditemukan.</p>
+        <p className="text-muted">Skenario tidak ditemukan.</p>
         <Link to="/worlds" className="text-teal text-sm mt-3 inline-block">
           Kembali ke daftar dunia
         </Link>
@@ -285,42 +294,49 @@ export default function Session() {
 
   const statusText = {
     ai: `${script.character} sedang berbicara…`,
-    awaiting: "Giliranmu — tekan mic dan bicara",
+    awaiting: "Giliranmu, tekan mic dan bicara",
     listening: "Mendengarkan… tekan lagi untuk berhenti",
-    reviewing: "Menganalisis jawabanmu…",
+    reviewing: "Menilai jawabanmu…",
   }[turn];
 
   return (
     <div className="max-w-2xl mx-auto px-5 sm:px-8 py-8 min-h-[calc(100vh-4rem)] flex flex-col">
+      {phase !== "briefing" && (
+        <h1 className="sr-only">Sesi latihan bersama {script.character}</h1>
+      )}
       {/* Top bar */}
       <div className="flex items-center justify-between">
-        <Link to="/worlds" className="inline-flex items-center gap-1.5 text-xs text-ivory/50 hover:text-ivory">
-          <ArrowLeft size={14} /> Semua dunia
+        <Link to="/worlds" className="inline-flex min-h-11 items-center gap-1.5 text-sm text-muted hover:text-ivory">
+          <ArrowLeft size={14} aria-hidden="true" /> Semua dunia
         </Link>
         {phase === "call" && (
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-ivory/40 tabular-nums">{formatClock(elapsed)}</span>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <span className="text-xs text-muted tabular-nums">{formatClock(elapsed)}</span>
             <button
+              type="button"
               onClick={() => setShowTranscript((v) => !v)}
-              className="inline-flex items-center gap-1.5 text-xs text-ivory/50 hover:text-ivory border border-ink-800 rounded-md px-2.5 py-1.5"
+              className="inline-flex min-h-11 items-center gap-1.5 text-xs text-muted hover:text-ivory border border-ink-700 rounded-sm px-2.5 py-1.5"
+              aria-expanded={showTranscript}
             >
-              <History size={13} /> Transkrip
+              <History size={13} aria-hidden="true" /> Transkrip
             </button>
             {voiceSupported && (
               <button
+                type="button"
                 onClick={() =>
                   turn === "ai"
                     ? stopAiSpeech()
                     : setVoiceOn((v) => !v)
                 }
-                className={`inline-flex items-center gap-1.5 text-xs border rounded-md px-2.5 py-1.5 ${
+                className={`inline-flex min-h-11 items-center gap-1.5 text-xs border rounded-sm px-2.5 py-1.5 ${
                   turn === "ai"
                     ? "text-amber border-amber/50 hover:bg-amber/10"
-                    : "text-ivory/50 border-ink-800 hover:text-ivory"
+                    : "text-muted border-ink-700 hover:text-ivory"
                 }`}
                 title={turn === "ai" ? "Klik untuk berhenti berbicara" : voiceOn ? "Nonaktifkan suara" : "Aktifkan suara"}
+                aria-label={turn === "ai" ? "Hentikan suara percakapan" : voiceOn ? "Nonaktifkan suara" : "Aktifkan suara"}
               >
-                {turn === "ai" ? <Square size={13} /> : voiceOn ? <Volume2 size={13} /> : <VolumeX size={13} />}
+                {turn === "ai" ? <Square size={13} aria-hidden="true" /> : voiceOn ? <Volume2 size={13} aria-hidden="true" /> : <VolumeX size={13} aria-hidden="true" />}
                 {turn === "ai" && "Klik untuk berhenti"}
               </button>
             )}
@@ -334,8 +350,8 @@ export default function Session() {
           <div className="w-full rounded-lg border border-ink-700 bg-ink-900 p-8">
             <span className="text-xs text-teal">{scenario.difficulty} · {scenario.estMinutes} menit</span>
             <h1 className="font-display text-3xl mt-2">{scenario.world}</h1>
-            <p className="text-ivory/70 text-sm mt-2">{scenario.location}</p>
-            <p className="text-ivory/75 mt-5 leading-relaxed">{scenario.tagline}</p>
+            <p className="text-muted text-sm mt-2">{scenario.location}</p>
+            <p className="mt-5 leading-relaxed">{scenario.tagline}</p>
 
             <div className="mt-6 flex items-center gap-3 rounded-md bg-ink-950 border border-ink-800 p-4">
               <span className="w-10 h-10 rounded-full bg-teal/15 grid place-items-center text-teal shrink-0">
@@ -343,20 +359,21 @@ export default function Session() {
               </span>
               <div>
                 <p className="text-sm">{script.character}</p>
-                <p className="text-xs text-ivory/50">{script.characterRole}</p>
+                <p className="text-xs text-muted">{script.characterRole}</p>
               </div>
             </div>
 
             <button
+              type="button"
               onClick={startSession}
-              className="mt-8 inline-flex items-center gap-2 bg-amber text-ink-950 px-5 py-3 rounded-md text-sm font-medium hover:bg-amber-soft transition-colors"
+              className="mt-8 inline-flex min-h-11 items-center gap-2 bg-amber text-white px-5 py-3 rounded-sm text-sm font-medium hover:bg-amber-soft"
             >
-              <Mic size={16} /> Mulai percakapan suara
+              <Mic size={16} aria-hidden="true" /> Mulai percakapan suara
             </button>
-            <p className="text-[11px] text-ivory/40 mt-3">
+            <p className="text-xs text-muted mt-3">
               {speechSupported
-                ? "Ini panggilan suara, bukan chat — bicaralah langsung ke mikrofon saat gilliranmu tiba."
-                : "Browser ini belum mendukung mic — kamu akan mengetik jawabanmu saat gilliranmu tiba."}
+                ? "Jawab lewat mikrofon saat giliranmu tiba."
+                : "Browser ini belum mendukung mikrofon. Kamu bisa mengetik jawaban."}
             </p>
           </div>
         </div>
@@ -368,7 +385,7 @@ export default function Session() {
           {/* Progress segments */}
           <div className="w-full flex gap-1.5">
             {Array.from({ length: totalSteps }).map((_, i) => (
-              <div key={i} className="h-1 flex-1 rounded-full bg-ink-800 overflow-hidden">
+              <div key={i} className="h-1 flex-1 rounded-full bg-ink-700 overflow-hidden">
                 <div
                   className={`h-full ${accentBg[accent]} transition-all duration-500`}
                   style={{
@@ -403,7 +420,7 @@ export default function Session() {
               </div>
             </div>
             <p className="text-sm mt-4">{script.character}</p>
-            <p className="text-xs text-ivory/45">{script.characterRole}</p>
+            <p className="text-xs text-muted">{script.characterRole}</p>
           </div>
 
           {/* Equalizer */}
@@ -423,7 +440,7 @@ export default function Session() {
           <div className="flex-1 flex items-center w-full">
             <div key={`${stepIndex}-${turn}-${caption?.text}`} className="caption-fade w-full text-center px-2">
               {turn === "listening" && liveText ? (
-                <p className="font-display text-xl sm:text-2xl leading-snug text-ivory/60 italic">“{liveText}”</p>
+                <p className="font-display text-xl sm:text-2xl leading-snug text-muted italic">“{liveText}”</p>
               ) : caption ? (
                 <>
                   <p className="font-display text-xl sm:text-2xl leading-snug">
@@ -439,26 +456,32 @@ export default function Session() {
             </div>
           </div>
 
-          <p className="text-xs text-ivory/45 mb-4">{statusText}</p>
+          <p className="text-xs text-muted mb-4" aria-live="polite">{statusText}</p>
           {micError && <p className="text-xs text-flag mb-3 text-center max-w-sm">{micError}</p>}
 
           {/* Typed fallback input */}
           {typedMode && turn === "awaiting" && (
-            <div className="w-full flex items-center gap-2 mb-4">
-              <input
-                autoFocus
-                value={typedDraft}
-                onChange={(e) => setTypedDraft(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && submitTyped()}
-                placeholder="Ketik jawabanmu…"
-                className="flex-1 bg-ink-950 border border-ink-800 rounded-md px-3 py-2.5 text-sm text-ivory placeholder:text-ivory/30 focus:border-teal/60"
-              />
+            <div className="w-full flex items-end gap-2 mb-4">
+              <div className="flex-1">
+                <label htmlFor="typed-response" className="block text-xs text-muted mb-1">Jawabanmu</label>
+                <input
+                  id="typed-response"
+                  autoFocus
+                  value={typedDraft}
+                  onChange={(e) => setTypedDraft(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && submitTyped()}
+                  placeholder="Ketik jawabanmu…"
+                  className="w-full min-h-11 bg-ink-900 border border-ink-700 rounded-sm px-3 py-2.5 text-sm text-ivory placeholder:text-muted focus:border-teal"
+                />
+              </div>
               <button
+                type="button"
                 onClick={submitTyped}
                 disabled={!typedDraft.trim()}
-                className="w-11 h-11 rounded-full grid place-items-center bg-teal text-ink-950 disabled:bg-ink-800 disabled:text-ivory/30"
+                className="w-11 h-11 rounded-sm grid place-items-center bg-teal text-white hover:bg-teal-deep disabled:bg-ink-800 disabled:text-muted"
+                aria-label="Kirim jawaban"
               >
-                <Send size={16} />
+                <Send size={16} aria-hidden="true" />
               </button>
             </div>
           )}
@@ -468,9 +491,10 @@ export default function Session() {
             <div className="w-full grid gap-2 mb-4">
               {currentStep.options.map((opt, i) => (
                 <button
+                  type="button"
                   key={i}
                   onClick={() => applyHint(opt.text)}
-                  className="text-left text-xs text-ivory/70 bg-ink-950 border border-ink-800 hover:border-teal/50 rounded-md px-3 py-2 transition-colors"
+                  className="text-left text-sm bg-ink-900 border border-ink-700 hover:border-teal rounded-sm px-3 py-3 transition-colors"
                 >
                   {opt.text}
                 </button>
@@ -481,58 +505,68 @@ export default function Session() {
           {/* Controls */}
           <div className="flex items-center justify-center gap-6">
             <button
+              type="button"
               onClick={() => setShowHints((v) => !v)}
               disabled={turn !== "awaiting"}
-              className="w-11 h-11 rounded-full grid place-items-center border border-ink-800 text-ivory/60 hover:text-ivory disabled:opacity-30"
+              className="w-11 h-11 rounded-sm grid place-items-center border border-ink-700 text-muted hover:text-ivory disabled:opacity-50"
               title="Contoh jawaban"
+              aria-label="Tampilkan contoh jawaban"
+              aria-expanded={showHints}
             >
-              <Lightbulb size={16} />
+              <Lightbulb size={16} aria-hidden="true" />
             </button>
 
             {!typedMode ? (
               <button
+                type="button"
                 onClick={turn === "listening" ? stopListening : beginListening}
                 disabled={turn === "ai" || turn === "reviewing"}
                 className={`w-16 h-16 rounded-full grid place-items-center transition-colors ${
                   turn === "listening"
                     ? "bg-flag text-white"
-                    : "bg-amber text-ink-950 hover:bg-amber-soft disabled:bg-ink-800 disabled:text-ivory/30"
+                    : "bg-amber text-white hover:bg-amber-soft disabled:bg-ink-800 disabled:text-muted"
                 }`}
+                aria-label={turn === "listening" ? "Berhenti merekam" : "Mulai bicara"}
               >
-                {turn === "listening" ? <Square size={20} /> : <Mic size={22} />}
+                {turn === "listening" ? <Square size={20} aria-hidden="true" /> : <Mic size={22} aria-hidden="true" />}
               </button>
             ) : (
-              <div className="w-16 h-16 rounded-full grid place-items-center bg-ink-800 text-ivory/30">
+              <div className="w-16 h-16 rounded-full grid place-items-center bg-ink-800 text-muted" aria-hidden="true">
                 <Keyboard size={20} />
               </div>
             )}
 
             {speechSupported ? (
               <button
+                type="button"
                 onClick={() => setTypedMode((v) => !v)}
                 disabled={turn !== "awaiting"}
-                className="w-11 h-11 rounded-full grid place-items-center border border-ink-800 text-ivory/60 hover:text-ivory disabled:opacity-30"
+                className="w-11 h-11 rounded-sm grid place-items-center border border-ink-700 text-muted hover:text-ivory disabled:opacity-50"
                 title="Ketik alih-alih bicara"
+                aria-label="Beralih ke mode mengetik"
               >
-                <Keyboard size={16} />
+                <Keyboard size={16} aria-hidden="true" />
               </button>
             ) : (
               <button
+                type="button"
                 onClick={endCallEarly}
-                className="w-11 h-11 rounded-full grid place-items-center border border-ink-800 text-flag hover:bg-flag/10"
+                className="w-11 h-11 rounded-sm grid place-items-center border border-ink-700 text-flag hover:bg-flag/10"
                 title="Akhiri sesi"
+                aria-label="Akhiri sesi"
               >
-                <PhoneOff size={16} />
+                <PhoneOff size={16} aria-hidden="true" />
               </button>
             )}
           </div>
 
           {speechSupported && (
             <button
+              type="button"
               onClick={endCallEarly}
-              className="mt-5 inline-flex items-center gap-1.5 text-[11px] text-ivory/40 hover:text-flag"
+              className="mt-5 inline-flex min-h-11 items-center gap-1.5 text-xs text-muted hover:text-flag"
             >
-              <PhoneOff size={12} /> Akhiri sesi
+              <PhoneOff size={12} aria-hidden="true" /> Akhiri sesi
             </button>
           )}
         </div>
@@ -540,20 +574,23 @@ export default function Session() {
 
       {/* Transcript drawer */}
       {phase === "call" && showTranscript && (
-        <div className="fixed inset-x-0 bottom-0 z-40 max-h-[60vh] overflow-y-auto thin-scroll bg-ink-950 border-t border-ink-800 rounded-t-lg p-5">
+        <div className="fixed inset-x-0 bottom-0 z-40 max-h-[60vh] overflow-y-auto thin-scroll bg-ink-900 border-t border-ink-700 p-5" role="region" aria-label="Transkrip percakapan">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-display text-lg">Transkrip percakapan</h3>
-            <button onClick={() => setShowTranscript(false)} className="text-ivory/50 hover:text-ivory">
-              <X size={18} />
+            <button type="button" onClick={() => setShowTranscript(false)} className="min-w-11 min-h-11 grid place-items-center text-muted hover:text-ivory" aria-label="Tutup transkrip">
+              <X size={18} aria-hidden="true" />
             </button>
           </div>
           <div className="space-y-3">
+            {thread.length === 0 && (
+              <p className="text-sm text-muted">Transkrip akan muncul setelah percakapan dimulai.</p>
+            )}
             {thread.map((msg, i) => (
               <div key={i} className={`text-sm ${msg.from === "user" ? "text-right" : "text-left"}`}>
-                <p className="text-[11px] text-ivory/40 mb-0.5">
+                <p className="text-[11px] text-muted mb-0.5">
                   {msg.from === "user" ? "Kamu" : script.character}
                 </p>
-                <p className="text-ivory/85">{msg.text}</p>
+                <p>{msg.text}</p>
               </div>
             ))}
           </div>
@@ -563,14 +600,14 @@ export default function Session() {
       {/* Call ended */}
       {phase === "ended" && (
         <div className="flex-1 flex items-center">
-          <div className="w-full rounded-lg border border-ink-700 bg-ink-900 p-8 text-center">
+          <div className="w-full border border-ink-700 bg-ink-900 p-8 text-center">
             <h2 className="font-display text-2xl">Sesi selesai!</h2>
-            <p className="text-ivory/65 text-sm mt-2">
+            <p className="text-muted text-sm mt-2">
               Percakapan dengan {script.character} berlangsung {formatClock(elapsed)}. Lihat evaluasi speaking-mu.
             </p>
             <button
               onClick={finishSession}
-              className="mt-6 inline-flex items-center gap-2 bg-amber text-ink-950 px-5 py-3 rounded-md text-sm font-medium hover:bg-amber-soft transition-colors"
+              className="mt-6 inline-flex min-h-11 items-center gap-2 bg-amber text-white px-5 py-3 rounded-sm text-sm font-medium hover:bg-amber-soft"
             >
               Lihat evaluasi
             </button>

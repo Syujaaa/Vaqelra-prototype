@@ -29,7 +29,7 @@
           { "text": "Ummm... students... they scared... to talk...", "quality": "weak", "tag": "pause" },
           { "text": "Students don't have partner for practice speaking.", "quality": "ok", "tag": "tense" }
         ],
-        "aiReply": "Good point. Last question — how would you measure whether the app is actually working?"
+        "aiReply": "Good point. Last question: how would you measure whether the app is actually working?"
       },
       {
         "id": 4,
@@ -72,7 +72,7 @@
           { "text": "One time project is broken, I fix it slowly.", "quality": "weak", "tag": "tense" },
           { "text": "There was a problem... it was hard... but I solved.", "quality": "ok", "tag": "pause" }
         ],
-        "aiReply": "That's a solid example. Last one — where do you see yourself in three years?"
+        "aiReply": "That's a solid example. Last one: where do you see yourself in three years?"
       },
       {
         "id": 4,
@@ -115,7 +115,7 @@
           { "text": "Yes one bag, is heavy maybe.", "quality": "ok", "tag": "grammar" },
           { "text": "Bag... yes... one.", "quality": "weak", "tag": "pause" }
         ],
-        "aiReply": "That's within the limit. Here's your boarding pass — gate 22, boarding starts at 3:40."
+        "aiReply": "That's within the limit. Here's your boarding pass, gate 22, boarding starts at 3:40."
       },
       {
         "id": 4,
@@ -131,12 +131,12 @@
   "new-friend": {
     "character": "Jordan Reyes",
     "characterRole": "Peserta Meetup",
-    "opening": "Hey, I don't think we've met — I'm Jordan. How do you know people here?",
+    "opening": "Hey, I don't think we've met. I'm Jordan. How do you know people here?",
     "steps": [
       {
         "id": 1,
         "options": [
-          { "text": "Hi Jordan, I'm new actually — a friend of mine invited me to check out the community.", "quality": "strong" },
+          { "text": "Hi Jordan, I'm new. A friend of mine invited me to check out the community.", "quality": "strong" },
           { "text": "I don't know people, my friend invite me.", "quality": "ok", "tag": "grammar" },
           { "text": "Friend. He invite.", "quality": "weak", "tag": "short-answer" }
         ],
@@ -158,7 +158,7 @@
           { "text": "Because I bad at speaking before, so I make this.", "quality": "ok", "tag": "grammar" },
           { "text": "I don't know, just an idea, maybe.", "quality": "weak", "tag": "vocabulary" }
         ],
-        "aiReply": "That's a great reason. We should exchange contacts — I'd love to try it sometime."
+        "aiReply": "That's a great reason. We should exchange contacts. I'd love to try it sometime."
       }
     ]
   },

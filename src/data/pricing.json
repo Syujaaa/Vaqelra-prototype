@@ -5,10 +5,10 @@
     "price": "Rp0",
     "period": "selamanya",
     "features": [
-      "5 menit speaking per hari",
-      "1 dunia virtual",
-      "Feedback grammar dasar",
-      "Progress sederhana"
+      "Latihan bicara 5 menit per hari",
+      "1 skenario latihan",
+      "Umpan balik tata bahasa dasar",
+      "Ringkasan progres"
     ],
     "cta": "Mulai gratis"
   },
@@ -19,11 +19,11 @@
     "period": "/ bulan",
     "highlight": true,
     "features": [
-      "Speaking lebih panjang, tanpa batas harian ketat",
-      "Semua dunia simulasi",
-      "AI Memory of Your Mistakes",
-      "Personal learning path",
-      "Pronunciation feedback mendalam",
+      "Durasi latihan lebih panjang",
+      "Akses ke semua skenario",
+      "Rekap pola kesalahan",
+      "Rencana latihan personal",
+      "Umpan balik pengucapan lebih rinci",
       "Laporan perkembangan mingguan"
     ],
     "cta": "Upgrade ke Pro"

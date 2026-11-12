@@ -1,70 +1,62 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { Compass, Home, LayoutDashboard, Sparkles, Tag } from "lucide-react";
 import { useApp } from "../context/AppContext";
 
 const navItems = [
-  { to: "/", label: "Beranda", icon: Home, end: true },
-  { to: "/worlds", label: "Dunia Simulasi", icon: Compass },
-  { to: "/dashboard", label: "Progress", icon: LayoutDashboard },
-  { to: "/pricing", label: "Paket", icon: Tag },
+  { to: "/", label: "Beranda", end: true },
+  { to: "/worlds", label: "Dunia latihan" },
+  { to: "/dashboard", label: "Progress" },
+  { to: "/pricing", label: "Paket" },
 ];
 
 export default function Layout() {
   const { progress } = useApp();
 
   return (
-    <div className="min-h-full bg-ink-950 text-ivory">
-      <header className="border-b border-ink-800/80 sticky top-0 z-30 bg-ink-950/90 backdrop-blur">
-        <div className="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between gap-4">
-          <NavLink to="/" className="flex items-center gap-2 shrink-0">
-            <span className="w-8 h-8 rounded-md bg-amber grid place-items-center text-ink-950">
-              <Sparkles size={16} strokeWidth={2.5} />
-            </span>
-            <span className="font-display text-lg tracking-tight">Vaqelra</span>
+    <div className="min-h-screen bg-canvas text-ivory">
+      <header className="sticky top-0 z-30 border-b border-ink-700 bg-ink-900">
+        <div className="max-w-6xl mx-auto px-5 sm:px-8 min-h-16 flex items-center justify-between gap-4">
+          <NavLink to="/" className="inline-flex min-h-11 items-center shrink-0">
+            <span className="font-display text-2xl tracking-tight">Vaqelra</span>
           </NavLink>
 
-          <nav className="hidden sm:flex items-center gap-1">
-            {navItems.map(({ to, label, icon: Icon, end }) => (
+          <nav aria-label="Navigasi utama" className="hidden sm:flex items-center gap-1">
+            {navItems.map(({ to, label, end }) => (
               <NavLink
                 key={to}
                 to={to}
                 end={end}
                 className={({ isActive }) =>
-                  `flex items-center gap-1.5 px-3 py-2 rounded-md text-sm transition-colors ${
+                  `inline-flex min-h-11 items-center px-3 rounded-sm text-sm ${
                     isActive
-                      ? "bg-ink-800 text-amber"
-                      : "text-ivory/70 hover:text-ivory hover:bg-ink-900"
+                      ? "text-teal underline underline-offset-8 decoration-2"
+                      : "text-muted hover:text-ivory hover:bg-ink-950"
                   }`
                 }
               >
-                <Icon size={15} />
                 {label}
               </NavLink>
             ))}
           </nav>
 
-          <div className="flex items-center gap-2 text-xs text-ivory/70">
-            <span className="hidden md:inline">Level {progress.level}</span>
-            <span className="w-1 h-1 rounded-full bg-ivory/30 hidden md:inline" />
-            <span className="flex items-center gap-1">
-              🔥 {progress.streakDays}h
-            </span>
+          <div className="hidden md:block text-right text-xs text-muted">
+            <span>Level {progress.level}</span>
+            <span className="px-2" aria-hidden="true">/</span>
+            <span>{progress.streakDays} hari berlatih</span>
           </div>
         </div>
 
-        <nav className="sm:hidden flex items-center justify-around border-t border-ink-800/80 h-12">
-          {navItems.map(({ to, label, icon: Icon, end }) => (
+        <nav aria-label="Navigasi utama" className="mobile-nav sm:hidden flex items-stretch justify-around border-t border-ink-800 min-h-14 px-1">
+          {navItems.map(({ to, label, end }) => (
             <NavLink
               key={to}
               to={to}
               end={end}
               className={({ isActive }) =>
-                `flex flex-col items-center justify-center gap-0.5 text-[10px] ${
-                  isActive ? "text-amber" : "text-ivory/60"
+                `flex flex-1 items-center justify-center px-1 text-[11px] text-center ${
+                  isActive ? "text-teal underline underline-offset-4 decoration-2" : "text-muted"
                 }`
               }
             >
-              <Icon size={16} />
               {label}
             </NavLink>
           ))}
@@ -72,13 +64,21 @@ export default function Layout() {
       </header>
 
       <main>
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:bg-ink-900 focus:px-4 focus:py-3"
+        >
+          Lewati ke konten
+        </a>
+        <div id="main-content">
         <Outlet />
+        </div>
       </main>
 
       <footer className="border-t border-ink-800/80 mt-24">
-        <div className="max-w-6xl mx-auto px-5 sm:px-8 py-10 text-xs text-ivory/50 flex flex-col sm:flex-row gap-2 justify-between">
-          <p>Vaqelra — AI English Life Simulator. Prototype, data lokal (JSON), tanpa backend.</p>
-          <p>Dibuat dari dokumen proposal ide bisnis startup.</p>
+        <div className="max-w-6xl mx-auto px-5 sm:px-8 py-8 text-xs text-muted flex flex-col sm:flex-row gap-2 justify-between">
+          <p>Vaqelra | Latihan bahasa Inggris berbasis skenario.</p>
+          <p>Prototipe lokal. Data sesi tersimpan di browser.</p>
         </div>
       </footer>
     </div>

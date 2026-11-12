@@ -3,18 +3,26 @@ import ScenarioCard from "../components/ScenarioCard";
 
 export default function Worlds() {
   return (
-    <div className="max-w-6xl mx-auto px-5 sm:px-8 py-14">
-      <span className="text-teal text-xs tracking-wide">Dunia Simulasi</span>
-      <h1 className="font-display text-3xl sm:text-4xl mt-3">Kehidupan mana yang ingin kamu jalani?</h1>
-      <p className="text-ivory/65 text-sm sm:text-base mt-3 max-w-xl">
-        Setiap dunia punya karakter AI, konteks, dan gaya percakapan sendiri. Pilih satu untuk
-        memulai sesi speaking bersuara.
-      </p>
-
-      <div className="grid sm:grid-cols-3 auto-rows-fr gap-4 mt-10">
-        {scenarios.map((s, i) => (
-          <ScenarioCard key={s.id} scenario={s} size={i === 0 ? "lg" : "md"} />
-        ))}
+    <div className="max-w-6xl mx-auto px-5 sm:px-8 py-12 sm:py-16">
+      <div className="grid lg:grid-cols-[0.7fr_1.3fr] gap-8 lg:gap-16">
+        <div>
+          <h1 className="font-display text-4xl sm:text-5xl leading-tight">
+            Pilih tempat untuk mulai bicara.
+          </h1>
+          <p className="text-muted text-sm sm:text-base mt-4 leading-relaxed">
+            {scenarios.length} skenario dengan konteks percakapan yang berbeda.
+            Pilih satu untuk melihat ringkasan sebelum sesi dimulai.
+          </p>
+        </div>
+        <div>
+          {scenarios.map((scenario, index) => (
+            <ScenarioCard
+              key={scenario.id}
+              scenario={scenario}
+              number={String(index + 1).padStart(2, "0")}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

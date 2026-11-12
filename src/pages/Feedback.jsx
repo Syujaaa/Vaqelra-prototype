@@ -18,11 +18,11 @@ function ScoreBar({ label, value }) {
   const tone = value >= 80 ? "bg-teal" : value >= 60 ? "bg-amber" : "bg-flag";
   return (
     <div>
-      <div className="flex justify-between text-xs text-ivory/60 mb-1.5">
+      <div className="flex justify-between text-xs text-muted mb-1.5">
         <span>{label}</span>
         <span>{value}/100</span>
       </div>
-      <div className="h-2 rounded-full bg-ink-800 overflow-hidden">
+      <div className="h-2 rounded-full bg-ink-700 overflow-hidden">
         <div className={`h-full ${tone}`} style={{ width: `${value}%` }} />
       </div>
     </div>
@@ -43,21 +43,20 @@ export default function Feedback() {
   );
 
   return (
-    <div className="max-w-3xl mx-auto px-5 sm:px-8 py-14">
-      <span className="text-teal text-xs">{scenario.world}</span>
-      <h1 className="font-display text-3xl sm:text-4xl mt-2">Evaluasi sesi speaking-mu</h1>
-      <p className="text-ivory/65 text-sm mt-2">
-        {turns} respons dianalisis dari percakapan dengan {scenario.role}.
+    <div className="max-w-5xl mx-auto px-5 sm:px-8 py-12 sm:py-16">
+      <p className="text-sm text-teal">{scenario.world}</p>
+      <h1 className="font-display text-4xl sm:text-5xl mt-3">Catatan setelah percakapan</h1>
+      <p className="text-muted text-sm mt-3">
+        {turns} jawaban ditinjau dari percakapan dengan {scenario.role}. Nilai dibuat dengan
+        penilaian prototipe sederhana.
       </p>
 
-      <div className="grid sm:grid-cols-[auto,1fr] gap-8 mt-10">
-        <div className="flex sm:flex-col items-center sm:items-start gap-4 sm:gap-2">
-          <div className="w-24 h-24 rounded-full border-4 border-teal grid place-items-center">
-            <span className="font-display text-2xl">{overall}</span>
-          </div>
-          <p className="text-xs text-ivory/50 sm:max-w-[7rem]">Skor keseluruhan sesi ini</p>
+      <div className="grid lg:grid-cols-[0.7fr_1.3fr] gap-8 lg:gap-16 mt-10 sm:mt-14">
+        <div className="border-t-2 border-teal pt-4">
+          <p className="text-sm text-muted">Rata-rata sesi</p>
+          <p className="font-display text-7xl mt-2">{overall}</p>
+          <p className="text-xs text-muted mt-2">Dari empat kategori penilaian.</p>
         </div>
-
         <div className="space-y-4">
           {Object.entries(scores).map(([key, value]) => (
             <ScoreBar key={key} label={scoreLabels[key]} value={value} />
@@ -66,43 +65,49 @@ export default function Feedback() {
       </div>
 
       <div className="mt-12">
-        <h2 className="font-display text-xl">Koreksi jawaban</h2>
-        <div className="space-y-3 mt-4">
-          {corrections.map((item, index) => (
-            <div key={`${item.text}-${index}`} className="rounded-md border border-ink-800 bg-ink-900 p-4">
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-xs text-ivory/45">Respons {index + 1}</span>
-                <span className={`text-xs ${item.quality === "strong" ? "text-teal" : item.quality === "ok" ? "text-amber" : "text-flag"}`}>
-                  {qualityLabel[item.quality]}
-                </span>
-              </div>
-              <p className="text-sm mt-2">“{item.text}”</p>
-              {item.quality !== "strong" && item.correction && (
-                <div className="mt-2 space-y-1">
-                  <p className="text-xs text-ivory/55">
-                    Catatan: {mistakeTags[item.tag]?.detail ?? "Coba gunakan kalimat yang lebih lengkap dan spesifik."}
-                  </p>
-                  <p className="text-xs text-teal">Contoh yang lebih kuat: {item.correction}</p>
+        <h2 className="font-display text-3xl">Jawaban dan saran</h2>
+        {corrections.length === 0 ? (
+          <p className="border-t border-ink-700 mt-4 pt-4 text-sm text-muted">
+            Belum ada jawaban untuk ditinjau pada sesi ini.
+          </p>
+        ) : (
+          <div className="mt-4">
+            {corrections.map((item, index) => (
+              <article key={`${item.text}-${index}`} className="border-t border-ink-700 py-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-xs text-muted">Respons {index + 1}</span>
+                  <span className={`text-xs font-medium ${item.quality === "strong" ? "text-teal" : item.quality === "ok" ? "text-amber" : "text-flag"}`}>
+                    {qualityLabel[item.quality]}
+                  </span>
                 </div>
-              )}
-            </div>
-          ))}
-        </div>
+                <p className="text-sm mt-2">“{item.text}”</p>
+                {item.quality !== "strong" && item.correction && (
+                  <div className="mt-3 space-y-1">
+                    <p className="text-xs text-muted">
+                      Catatan: {mistakeTags[item.tag]?.detail ?? "Coba gunakan kalimat yang lebih lengkap dan spesifik."}
+                    </p>
+                    <p className="text-sm text-teal">Contoh yang lebih jelas: {item.correction}</p>
+                  </div>
+                )}
+              </article>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="mt-12">
-        <h2 className="font-display text-xl">AI Memory of Your Mistakes</h2>
+        <h2 className="font-display text-3xl">Pola yang muncul</h2>
         {mistakes.length === 0 ? (
-          <p className="text-ivory/65 text-sm mt-2">
-            Tidak ada pola kesalahan menonjol terdeteksi pada sesi ini — kerja bagus!
+          <p className="text-muted text-sm mt-3">
+            Belum ada pola kesalahan yang tercatat pada sesi ini.
           </p>
         ) : (
-          <div className="grid sm:grid-cols-2 gap-3 mt-4">
+          <div className="grid sm:grid-cols-2 gap-x-8 mt-4">
             {mistakes.map((tag) => (
-              <div key={tag} className="rounded-md border border-ink-800 bg-ink-900 p-4">
+              <article key={tag} className="border-t border-ink-700 py-4">
                 <p className="text-sm text-flag">{mistakeTags[tag]?.label ?? tag}</p>
-                <p className="text-xs text-ivory/55 mt-1">{mistakeTags[tag]?.detail}</p>
-              </div>
+                <p className="text-xs text-muted mt-1">{mistakeTags[tag]?.detail}</p>
+              </article>
             ))}
           </div>
         )}
@@ -111,15 +116,15 @@ export default function Feedback() {
       <div className="flex flex-wrap gap-4 mt-12">
         <Link
           to="/dashboard"
-          className="inline-flex items-center gap-2 bg-amber text-ink-950 px-5 py-3 rounded-md text-sm font-medium hover:bg-amber-soft transition-colors"
+          className="inline-flex min-h-11 items-center gap-2 bg-amber text-white px-5 py-3 rounded-sm text-sm font-medium hover:bg-amber-soft"
         >
-          Lihat progress lengkap
+          Buka catatan latihan
         </Link>
         <Link
           to="/worlds"
-          className="text-sm text-ivory/70 hover:text-ivory underline underline-offset-4 decoration-ivory/30 self-center"
+          className="inline-flex min-h-11 items-center text-sm text-teal hover:text-ink underline underline-offset-4 self-center"
         >
-          Coba dunia lain
+          Pilih skenario lain
         </Link>
       </div>
     </div>

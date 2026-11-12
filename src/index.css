@@ -4,6 +4,8 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Reading this as: an English-practice app for Indonesian learners, in a warm travel-journal style; ENERGY 2 / RHYTHM 3 / MOTION 1. Paper, ink, and forest green ground the editorial palette, rust marks primary actions, and Fraunces adds a book-like voice. */
+/* The split hero gives one real scenario focus, ordered rows make the rest comparable, folio numbers orient the list, and spacing contracts for mobile. */
 * {
   box-sizing: border-box;
 }
@@ -11,20 +13,20 @@
 html,
 body,
 #root {
-  height: 100%;
+  min-height: 100%;
 }
 
 body {
   margin: 0;
-  background-color: #15142A;
-  color: #F5F1E6;
+  background-color: #F3EBDD;
+  color: #292720;
   font-family: "Space Grotesk", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
 ::selection {
-  background: #E6A930;
-  color: #15142A;
+  background: #A74E2E;
+  color: #FFFCF5;
 }
 
 .font-display {
@@ -35,8 +37,33 @@ a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid #E6A930;
-  outline-offset: 2px;
+  outline: 2px solid #355843;
+  outline-offset: 3px;
+}
+
+a,
+button,
+summary,
+select,
+label[for],
+input[type="checkbox"],
+input[type="radio"] {
+  cursor: pointer;
+}
+
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+button,
+a {
+  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease;
+}
+
+a[href]:active,
+button:not(:disabled):active {
+  transform: translateY(1px);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -47,11 +74,31 @@ textarea:focus-visible {
   }
 }
 
+@media (max-width: 240px) {
+  .mobile-nav {
+    flex-wrap: wrap;
+  }
+  .mobile-nav a {
+    flex: 1 1 45%;
+    min-height: 44px;
+  }
+  #main-content * {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  #main-content [class*="grid"] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  #main-content h1 {
+    font-size: 1.75rem !important;
+  }
+}
+
 .thin-scroll::-webkit-scrollbar {
   width: 6px;
 }
 .thin-scroll::-webkit-scrollbar-thumb {
-  background: #2A2948;
+  background: #8A7B68;
   border-radius: 999px;
 }
 
