@@ -1,5 +1,6 @@
-import { Link, Navigate, useLocation } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import mistakeTags from "../data/mistakeTags.json";
+import { ActionLink, PageContainer, PageTitle, SectionTitle } from "../components/ui";
 
 const scoreLabels = {
   grammar: "Grammar",
@@ -43,9 +44,9 @@ export default function Feedback() {
   );
 
   return (
-    <div className="max-w-5xl mx-auto px-5 sm:px-8 py-12 sm:py-16">
+    <PageContainer size="content" className="py-12 sm:py-16">
       <p className="text-sm text-teal">{scenario.world}</p>
-      <h1 className="font-display text-4xl sm:text-5xl mt-3">Catatan setelah percakapan</h1>
+      <PageTitle className="mt-3">Catatan setelah percakapan</PageTitle>
       <p className="text-muted text-sm mt-3">
         {turns} jawaban ditinjau dari percakapan dengan {scenario.role}. Nilai dibuat dengan
         penilaian prototipe sederhana.
@@ -65,7 +66,7 @@ export default function Feedback() {
       </div>
 
       <div className="mt-12">
-        <h2 className="font-display text-3xl">Jawaban dan saran</h2>
+        <SectionTitle>Jawaban dan saran</SectionTitle>
         {corrections.length === 0 ? (
           <p className="border-t border-ink-700 mt-4 pt-4 text-sm text-muted">
             Belum ada jawaban untuk ditinjau pada sesi ini.
@@ -96,7 +97,7 @@ export default function Feedback() {
       </div>
 
       <div className="mt-12">
-        <h2 className="font-display text-3xl">Pola yang muncul</h2>
+        <SectionTitle>Pola yang muncul</SectionTitle>
         {mistakes.length === 0 ? (
           <p className="text-muted text-sm mt-3">
             Belum ada pola kesalahan yang tercatat pada sesi ini.
@@ -114,19 +115,19 @@ export default function Feedback() {
       </div>
 
       <div className="flex flex-wrap gap-4 mt-12">
-        <Link
+        <ActionLink
           to="/dashboard"
-          className="inline-flex min-h-11 items-center gap-2 bg-amber text-white px-5 py-3 rounded-sm text-sm font-medium hover:bg-amber-soft"
         >
           Buka catatan latihan
-        </Link>
-        <Link
+        </ActionLink>
+        <ActionLink
           to="/worlds"
-          className="inline-flex min-h-11 items-center text-sm text-teal hover:text-ink underline underline-offset-4 self-center"
+          variant="text"
+          className="self-center"
         >
           Pilih skenario lain
-        </Link>
+        </ActionLink>
       </div>
-    </div>
+    </PageContainer>
   );
 }

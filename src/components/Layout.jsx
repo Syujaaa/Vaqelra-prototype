@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useApp } from "../context/AppContext";
+import { PageContainer } from "./ui";
 
 const navItems = [
   { to: "/", label: "Beranda", end: true },
@@ -14,7 +15,7 @@ export default function Layout() {
   return (
     <div className="min-h-screen bg-canvas text-ivory">
       <header className="sticky top-0 z-30 border-b border-ink-700 bg-ink-900">
-        <div className="max-w-6xl mx-auto px-5 sm:px-8 min-h-16 flex items-center justify-between gap-4">
+        <PageContainer className="min-h-16 flex items-center justify-between gap-4">
           <NavLink to="/" className="inline-flex min-h-11 items-center shrink-0">
             <span className="font-display text-2xl tracking-tight">Vaqelra</span>
           </NavLink>
@@ -43,7 +44,7 @@ export default function Layout() {
             <span className="px-2" aria-hidden="true">/</span>
             <span>{progress.streakDays} hari berlatih</span>
           </div>
-        </div>
+        </PageContainer>
 
         <nav aria-label="Navigasi utama" className="mobile-nav sm:hidden flex items-stretch justify-around border-t border-ink-800 min-h-14 px-1">
           {navItems.map(({ to, label, end }) => (
@@ -76,10 +77,10 @@ export default function Layout() {
       </main>
 
       <footer className="border-t border-ink-800/80 mt-24">
-        <div className="max-w-6xl mx-auto px-5 sm:px-8 py-8 text-xs text-muted flex flex-col sm:flex-row gap-2 justify-between">
+        <PageContainer className="py-8 text-xs text-muted flex flex-col sm:flex-row gap-2 justify-between">
           <p>Vaqelra | Latihan bahasa Inggris berbasis skenario.</p>
           <p>Prototipe lokal. Data sesi tersimpan di browser.</p>
-        </div>
+        </PageContainer>
       </footer>
     </div>
   );

@@ -24,6 +24,7 @@ import {
   speak,
   stopSpeaking,
 } from "../utils/speech";
+import { PageContainer, PageTitle, Surface } from "../components/ui";
 
 const accentText = { teal: "text-teal", amber: "text-amber", flag: "text-flag" };
 const accentBg = { teal: "bg-teal", amber: "bg-amber", flag: "bg-flag" };
@@ -300,7 +301,7 @@ export default function Session() {
   }[turn];
 
   return (
-    <div className="max-w-2xl mx-auto px-5 sm:px-8 py-8 min-h-[calc(100vh-4rem)] flex flex-col">
+    <PageContainer size="narrow" className="py-8 min-h-[calc(100vh-4rem)] flex flex-col">
       {phase !== "briefing" && (
         <h1 className="sr-only">Sesi latihan bersama {script.character}</h1>
       )}
@@ -347,9 +348,9 @@ export default function Session() {
       {/* Briefing */}
       {phase === "briefing" && (
         <div className="flex-1 flex items-center">
-          <div className="w-full rounded-lg border border-ink-700 bg-ink-900 p-8">
+          <Surface className="w-full rounded-lg p-8">
             <span className="text-xs text-teal">{scenario.difficulty} · {scenario.estMinutes} menit</span>
-            <h1 className="font-display text-3xl mt-2">{scenario.world}</h1>
+            <PageTitle size="compact" className="mt-2">{scenario.world}</PageTitle>
             <p className="text-muted text-sm mt-2">{scenario.location}</p>
             <p className="mt-5 leading-relaxed">{scenario.tagline}</p>
 
@@ -375,7 +376,7 @@ export default function Session() {
                 ? "Jawab lewat mikrofon saat giliranmu tiba."
                 : "Browser ini belum mendukung mikrofon. Kamu bisa mengetik jawaban."}
             </p>
-          </div>
+          </Surface>
         </div>
       )}
 
@@ -614,6 +615,6 @@ export default function Session() {
           </div>
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }

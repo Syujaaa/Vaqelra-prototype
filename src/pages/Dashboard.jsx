@@ -1,7 +1,7 @@
-import { Link } from "react-router-dom";
 import { RotateCcw, Trash2 } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import mistakeTags from "../data/mistakeTags.json";
+import { ActionLink, PageContainer, PageTitle, SectionTitle } from "../components/ui";
 
 export default function Dashboard() {
   const { progress, deleteSession, resetProgress, mistakeFrequency } = useApp();
@@ -10,10 +10,10 @@ export default function Dashboard() {
   const topMistakes = Object.entries(mistakeFrequency).sort((a, b) => b[1] - a[1]);
 
   return (
-    <div className="max-w-6xl mx-auto px-5 sm:px-8 py-12 sm:py-16">
+    <PageContainer className="py-12 sm:py-16">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="font-display text-4xl sm:text-5xl">Catatan latihan</h1>
+          <PageTitle>Catatan latihan</PageTitle>
           <p className="text-muted text-sm mt-3">Ringkasan sesi tersimpan di browser ini. Data awal ditandai sebagai contoh prototipe.</p>
         </div>
         <button
@@ -64,13 +64,13 @@ export default function Dashboard() {
 
       <section className="grid lg:grid-cols-2 gap-10 lg:gap-16 mt-14 sm:mt-20">
         <div>
-          <h2 className="font-display text-3xl">Riwayat sesi</h2>
+          <SectionTitle>Riwayat sesi</SectionTitle>
           {progress.completedSessions.length === 0 ? (
             <div className="border-t border-ink-700 mt-4 pt-4">
               <p className="text-sm text-muted">Belum ada sesi tersimpan.</p>
-              <Link to="/worlds" className="inline-flex min-h-11 items-center text-sm text-teal underline underline-offset-4 hover:text-ink">
+              <ActionLink to="/worlds" variant="text">
                 Pilih skenario latihan
-              </Link>
+              </ActionLink>
             </div>
           ) : (
             <ul className="mt-4">
@@ -104,7 +104,7 @@ export default function Dashboard() {
         </div>
 
         <div>
-          <h2 className="font-display text-3xl">Pola yang perlu dilatih</h2>
+          <SectionTitle>Pola yang perlu dilatih</SectionTitle>
           {topMistakes.length === 0 ? (
             <p className="border-t border-ink-700 mt-4 pt-4 text-sm text-muted">
               Belum ada pola kesalahan tercatat. Selesaikan sesi untuk melihat catatan di sini.
@@ -124,6 +124,6 @@ export default function Dashboard() {
           )}
         </div>
       </section>
-    </div>
+    </PageContainer>
   );
 }

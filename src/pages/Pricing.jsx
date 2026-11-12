@@ -1,10 +1,11 @@
 import pricing from "../data/pricing.json";
+import { PageContainer, PageTitle } from "../components/ui";
 
 export default function Pricing() {
   return (
-    <div className="max-w-6xl mx-auto px-5 sm:px-8 py-12 sm:py-16">
+    <PageContainer className="py-12 sm:py-16">
       <div className="max-w-2xl">
-        <h1 className="font-display text-4xl sm:text-5xl">Rancangan paket</h1>
+        <PageTitle>Rancangan paket</PageTitle>
         <p className="text-muted text-sm sm:text-base mt-4 leading-relaxed">
           Paket dan harga berikut masih usulan awal, bukan penawaran resmi.
           Prototipe ini tidak memproses pembayaran.
@@ -39,6 +40,6 @@ export default function Pricing() {
           </section>
         ))}
       </div>
-    </div>
+    </PageContainer>
   );
 }

@@ -4,7 +4,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Reading this as: an English-practice app for Indonesian learners, in a warm travel-journal style; ENERGY 2 / RHYTHM 3 / MOTION 1. Paper, ink, and forest green ground the editorial palette, rust marks primary actions, and Fraunces adds a book-like voice. */
+/* Reading this as: an English-practice app for Indonesian learners, in a warm travel-journal style; ENERGY 2 / RHYTHM 3 / MOTION 2. Paper, ink, and forest green ground the editorial palette, rust marks primary actions, and Fraunces adds a book-like voice. */
 /* The split hero gives one real scenario focus, ordered rows make the rest comparable, folio numbers orient the list, and spacing contracts for mobile. */
 * {
   box-sizing: border-box;
@@ -36,7 +36,8 @@ body {
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
-textarea:focus-visible {
+textarea:focus-visible,
+select:focus-visible {
   outline: 2px solid #355843;
   outline-offset: 3px;
 }
@@ -113,7 +114,7 @@ button:not(:disabled):active {
   inset: 0;
   border-radius: 9999px;
   border: 1.5px solid currentColor;
-  animation: ring-pulse 2.2s ease-out infinite;
+  animation: ring-pulse 2.2s ease-out 1;
 }
 .call-ring.delay-1 { animation-delay: 0.7s; }
 .call-ring.delay-2 { animation-delay: 1.4s; }
@@ -131,7 +132,7 @@ button:not(:disabled):active {
   50% { transform: scaleY(1); }
 }
 .eq-bar {
-  animation: eq-bounce 0.9s ease-in-out infinite;
+  animation: eq-bounce 0.9s ease-in-out 1;
   transform-origin: center;
 }
 .eq-bar.still {
