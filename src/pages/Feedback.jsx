@@ -48,7 +48,7 @@ export default function Feedback() {
       <p className="text-sm text-teal">{scenario.world}</p>
       <PageTitle className="mt-3">Catatan setelah percakapan</PageTitle>
       <p className="text-muted text-sm mt-3">
-        {turns} jawaban ditinjau Gemini dari percakapan dengan {scenario.role}. Penilaian dibuat
+        {turns} jawaban ditinjau AI dari percakapan dengan {scenario.role}. Penilaian dibuat
         berdasarkan transkrip teks, pronunciation tidak dinilai.
       </p>
 

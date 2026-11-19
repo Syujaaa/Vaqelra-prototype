@@ -78,7 +78,9 @@ export default function Session() {
 
   const recognizerRef = useRef(null);
   const finalTextRef = useRef("");
+  const liveTextRef = useRef("");
   const shouldContinueListeningRef = useRef(false);
+  const confirmAfterStopRef = useRef(false);
   const fallbackTimerRef = useRef(null);
   const turnRef = useRef(turn);
   const endingRef = useRef(false);
@@ -115,6 +117,7 @@ export default function Session() {
   useEffect(() => {
     return () => {
       shouldContinueListeningRef.current = false;
+      confirmAfterStopRef.current = false;
       recognizerRef.current?.stop();
       stopSpeaking();
       if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
@@ -180,7 +183,7 @@ export default function Session() {
       setHints(opening.hints);
       goToAiLine(opening.reply);
     } catch (error) {
-      setGeminiError(error.message || "Tidak bisa memulai percakapan Gemini.");
+      setGeminiError(error.message || "Tidak bisa memulai sesi. Coba lagi.");
     } finally {
       setIsConnecting(false);
     }
@@ -219,7 +222,7 @@ export default function Session() {
       goToAiLine(response.reply, ending);
     } catch (error) {
       setTurn("awaiting");
-      setGeminiError(error.message || "Gemini gagal menilai jawabanmu. Coba lagi.");
+      setGeminiError(error.message || "Penilaian gagal diproses. Coba lagi.");
     }
   }
 
@@ -232,24 +235,34 @@ export default function Session() {
     setMicError("");
     stopSpeaking();
     finalTextRef.current = "";
+    liveTextRef.current = "";
     setLiveText("");
     shouldContinueListeningRef.current = true;
+    confirmAfterStopRef.current = false;
 
     const recognizer = createRecognizer({
-      onInterim: (text) => setLiveText(`${finalTextRef.current} ${text}`.trim()),
+      onInterim: (text) => {
+        liveTextRef.current = `${finalTextRef.current} ${text}`.trim();
+        setLiveText(liveTextRef.current);
+      },
       onFinal: (text) => {
         finalTextRef.current = `${finalTextRef.current} ${text}`.trim();
-        setLiveText(finalTextRef.current);
+        liveTextRef.current = finalTextRef.current;
+        setLiveText(liveTextRef.current);
       },
       onEnd: () => {
-        if (shouldContinueListeningRef.current && turnRef.current === "listening") {
-          recognizer.start();
+        if (confirmAfterStopRef.current) {
+          confirmAfterStopRef.current = false;
+          finalizeAnswer(finalTextRef.current || liveTextRef.current);
           return;
         }
-        if (turnRef.current === "listening") finalizeAnswer(finalTextRef.current);
+        if (shouldContinueListeningRef.current && turnRef.current === "listening") {
+          recognizer.start();
+        }
       },
       onError: (err) => {
         shouldContinueListeningRef.current = false;
+        confirmAfterStopRef.current = false;
         setTurn("awaiting");
         setMicError(
           err === "not-allowed"
@@ -270,12 +283,38 @@ export default function Session() {
 
   function stopListening() {
     shouldContinueListeningRef.current = false;
+    confirmAfterStopRef.current = false;
+    setTurn("confirming");
     recognizerRef.current?.stop();
+  }
+
+  function confirmAnswer() {
+    if (turn === "listening") {
+      if (!(finalTextRef.current || liveTextRef.current).trim()) return;
+      confirmAfterStopRef.current = true;
+      shouldContinueListeningRef.current = false;
+      setTurn("reviewing");
+      recognizerRef.current?.stop();
+      return;
+    }
+    if (turn === "confirming") {
+      finalizeAnswer(finalTextRef.current || liveTextRef.current);
+    }
+  }
+
+  function cancelRecording() {
+    shouldContinueListeningRef.current = false;
+    confirmAfterStopRef.current = false;
+    recognizerRef.current?.stop();
+    finalTextRef.current = "";
+    liveTextRef.current = "";
+    setLiveText("");
+    setMicError("");
+    setTurn("awaiting");
   }
 
   function applyHint(text) {
     setShowHints(false);
-    if (turn === "listening") stopListening();
     finalizeAnswer(text);
   }
 
@@ -286,6 +325,7 @@ export default function Session() {
 
   function endCallEarly() {
     shouldContinueListeningRef.current = false;
+    confirmAfterStopRef.current = false;
     stopSpeaking();
     recognizerRef.current?.stop();
     if (history.length === 0) {
@@ -312,7 +352,8 @@ export default function Session() {
     ai: `${scenario.role} sedang berbicara…`,
     awaiting: "Giliranmu, tekan mic dan bicara",
     listening: "Mendengarkan… tekan lagi untuk berhenti",
-    reviewing: "Gemini sedang menyiapkan respons…",
+    confirming: "Periksa transkrip sebelum dikirim",
+    reviewing: "Menunggu proses…",
   }[turn];
 
   return (
@@ -369,7 +410,7 @@ export default function Session() {
             <p className="text-muted text-sm mt-2">{scenario.location}</p>
             <p className="mt-5 leading-relaxed">{scenario.tagline}</p>
             <p className="text-xs text-muted mt-4">
-              Transkrip jawaban dikirim langsung ke Gemini untuk membuat respons dan evaluasi.
+              Transkrip jawaban dikirim ke layanan AI untuk membuat respons dan evaluasi.
             </p>
 
             <div className="mt-6 flex items-center gap-3 rounded-md bg-ink-950 border border-ink-800 p-4">
@@ -384,8 +425,7 @@ export default function Session() {
 
             {!isGeminiConfigured() && (
               <p className="text-sm text-flag mt-5" role="alert">
-                Isi VITE_GEMINI_API_KEY di file .env lalu jalankan ulang aplikasi untuk memakai
-                percakapan Gemini.
+                Tambahkan API key ke file .env lalu jalankan ulang aplikasi untuk memulai sesi.
               </p>
             )}
             {geminiError && (
@@ -398,7 +438,7 @@ export default function Session() {
               className="mt-8 inline-flex min-h-11 items-center gap-2 bg-amber text-white px-5 py-3 rounded-sm text-sm font-medium hover:bg-amber-soft disabled:opacity-60"
             >
               <Mic size={16} aria-hidden="true" />
-              {isConnecting ? "Menghubungkan ke Gemini..." : "Mulai percakapan suara"}
+              {isConnecting ? "Memulai sesi..." : "Mulai percakapan suara"}
             </button>
             <p className="text-xs text-muted mt-3">
               {speechSupported
@@ -423,7 +463,7 @@ export default function Session() {
                       i < stepIndex
                         ? "100%"
                         : i === stepIndex
-                        ? `${{ ai: 20, awaiting: 45, listening: 70, reviewing: 100 }[turn] ?? 0}%`
+                        ? `${{ ai: 20, awaiting: 45, listening: 70, confirming: 85, reviewing: 100 }[turn] ?? 0}%`
                         : "0%",
                   }}
                 />
@@ -469,7 +509,7 @@ export default function Session() {
           {/* Caption */}
           <div className="flex-1 flex items-center w-full">
             <div key={`${stepIndex}-${turn}-${caption?.text}`} className="caption-fade w-full text-center px-2">
-              {turn === "listening" && liveText ? (
+              {(turn === "listening" || turn === "confirming") && liveText ? (
                 <p className="font-display text-xl sm:text-2xl leading-snug text-muted italic">“{liveText}”</p>
               ) : caption ? (
                 <>
@@ -497,6 +537,26 @@ export default function Session() {
                 className="min-h-11 px-3 text-xs border border-flag text-flag hover:bg-flag/10 rounded-sm"
               >
                 Coba lagi
+              </button>
+            </div>
+          )}
+
+          {(turn === "listening" || turn === "confirming") && (
+            <div className="mb-4 flex w-full max-w-sm items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={confirmAnswer}
+                disabled={!liveText.trim()}
+                className="min-h-11 flex-1 rounded-sm bg-amber px-4 text-sm font-medium text-white hover:bg-amber-soft disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Yakin
+              </button>
+              <button
+                type="button"
+                onClick={cancelRecording}
+                className="min-h-11 flex-1 rounded-sm border border-ink-700 px-4 text-sm text-muted hover:bg-ink-800 hover:text-ink"
+              >
+                Batal
               </button>
             </div>
           )}
@@ -564,13 +624,19 @@ export default function Session() {
               <button
                 type="button"
                 onClick={turn === "listening" ? stopListening : beginListening}
-                disabled={turn === "ai" || turn === "reviewing" || Boolean(geminiError)}
+                disabled={(turn !== "awaiting" && turn !== "listening") || Boolean(geminiError)}
                 className={`w-16 h-16 rounded-full grid place-items-center transition-colors ${
                   turn === "listening"
                     ? "bg-flag text-white"
                     : "bg-amber text-white hover:bg-amber-soft disabled:bg-ink-800 disabled:text-muted"
                 }`}
-                aria-label={turn === "listening" ? "Berhenti merekam" : "Mulai bicara"}
+                aria-label={
+                  turn === "listening"
+                    ? "Berhenti merekam"
+                    : turn === "confirming"
+                    ? "Rekaman dihentikan"
+                    : "Mulai bicara"
+                }
               >
                 {turn === "listening" ? <Square size={20} aria-hidden="true" /> : <Mic size={22} aria-hidden="true" />}
               </button>

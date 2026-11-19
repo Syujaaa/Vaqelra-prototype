@@ -49,7 +49,7 @@ function parseTurn(text, isOpening) {
     const json = text.replace(/^```(?:json)?\s*|\s*```$/g, "");
     turn = JSON.parse(json);
   } catch {
-    throw new Error("Gemini mengirim jawaban dengan format yang tidak bisa dibaca. Coba lagi.");
+    throw new Error("Respons tidak dapat dibaca. Coba lagi.");
   }
 
   if (
@@ -60,7 +60,7 @@ function parseTurn(text, isOpening) {
     !Array.isArray(turn.hints) ||
     turn.hints.some((hint) => typeof hint !== "string")
   ) {
-    throw new Error("Gemini mengirim jawaban yang belum lengkap. Coba lagi.");
+    throw new Error("Respons belum lengkap. Coba lagi.");
   }
   const hints = turn.hints.map((hint) => hint.trim()).filter(Boolean).slice(0, 2);
 
@@ -83,7 +83,7 @@ function parseTurn(text, isOpening) {
     !evaluation.scores ||
     !SCORE_KEYS.every((key) => isScore(evaluation.scores[key]))
   ) {
-    throw new Error("Gemini mengirim evaluasi yang belum lengkap. Coba kirim jawaban lagi.");
+    throw new Error("Evaluasi belum lengkap. Coba kirim jawaban lagi.");
   }
 
   return {
@@ -105,7 +105,7 @@ export function isGeminiConfigured() {
 
 export async function generateConversationTurn(scenario, thread) {
   if (!API_KEY) {
-    throw new Error("Tambahkan VITE_GEMINI_API_KEY ke file .env lalu jalankan ulang aplikasi.");
+    throw new Error("Tambahkan API key ke file .env lalu jalankan ulang aplikasi.");
   }
 
   const isOpening = thread.length === 0;
@@ -138,12 +138,15 @@ export async function generateConversationTurn(scenario, thread) {
   try {
     payload = await response.json();
   } catch {
-    throw new Error(`Respons Gemini tidak dapat dibaca (HTTP ${response.status}).`);
+    throw new Error(`Respons layanan AI tidak dapat dibaca (HTTP ${response.status}).`);
   }
   if (!response.ok) {
-    throw new Error(
-      payload.error?.message || `Gemini API gagal merespons (HTTP ${response.status}).`
-    );
+    const guidance = response.status === 401 || response.status === 403
+      ? "Periksa API key dan izinnya."
+      : response.status === 429
+      ? "Batas permintaan tercapai. Tunggu sebentar lalu coba lagi."
+      : "Periksa konfigurasi lalu coba lagi.";
+    throw new Error(`Layanan AI gagal memproses permintaan (HTTP ${response.status}). ${guidance}`);
   }
 
   const generatedText = payload.candidates?.[0]?.content?.parts
@@ -152,7 +155,7 @@ export async function generateConversationTurn(scenario, thread) {
     .trim();
 
   if (!generatedText) {
-    throw new Error("Gemini tidak mengirim respons. Coba lagi.");
+    throw new Error("Layanan AI tidak mengirim respons. Coba lagi.");
   }
 
   const learnerTurns = thread.filter((message) => message.from === "user").length;
