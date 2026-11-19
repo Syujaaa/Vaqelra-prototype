@@ -23,6 +23,19 @@ Karena tidak ada backend, API key dimasukkan ke bundle browser dan dapat dilihat
 situs. Batasi penggunaan key di Google AI Studio dan gunakan pendekatan ini hanya untuk demo
 lokal/prototipe. Jangan gunakan key produksi atau publikasikan deploy yang memuat key ini.
 
+### Deploy di Vercel
+
+1. Import repository ini sebagai project Vercel dengan framework preset **Vite**.
+2. Buka **Project Settings → Environment Variables**.
+3. Tambahkan `VITE_GEMINI_API_KEY` dengan API key Google AI Studio. Tambahkan
+   `VITE_GEMINI_MODEL` jika ingin mengganti model default.
+4. Pilih environment yang digunakan (**Preview**, **Production**, atau keduanya), lalu
+   deploy ulang agar nilainya masuk ke proses build Vite.
+
+Vite membaca environment variable saat build, bukan dari runtime server Vercel. Prefix `VITE_`
+berarti nilainya disertakan di bundle browser, jadi pengaturan Environment Variables di Vercel
+tidak menyembunyikan API key dari pengunjung.
+
 Untuk build produksi statis:
 
 ```bash
