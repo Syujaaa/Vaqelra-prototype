@@ -1,0 +1,164 @@
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY?.trim();
+const MODEL = import.meta.env.VITE_GEMINI_MODEL?.trim() || "gemini-3.8-flash";
+const API_URL = "https://generativelanguage.googleapis.com/v1beta/models";
+const QUALITY_VALUES = ["strong", "ok", "weak"];
+const MISTAKE_TAGS = [
+  "tense",
+  "grammar",
+  "short-answer",
+  "repetition",
+  "pause",
+  "vocabulary",
+];
+const SCORE_KEYS = ["grammar", "vocabulary", "relevance", "fluency"];
+const MAX_TURNS = 5;
+
+const SYSTEM_INSTRUCTION = `You are a warm, realistic English conversation partner for an Indonesian learner.
+Use the scenario to stay in character. Speak to the learner in natural English with concise replies.
+Ask one relevant question at a time and keep the conversation moving. Be encouraging, not overly formal.
+Return only valid JSON with this shape:
+{
+  "reply": "The next spoken line in English",
+  "hints": ["A useful example answer in English", "Another useful example answer in English"],
+  "complete": false,
+  "evaluation": null
+}
+For an opening turn, evaluation must be null and reply should start the conversation with one question.
+For a learner turn, evaluate only the latest learner answer. Return evaluation as:
+{
+  "quality": "strong, ok, or weak",
+  "tag": "tense, grammar, short-answer, repetition, pause, vocabulary, or null",
+  "correction": "A concise improvement or encouragement in Indonesian",
+  "scores": {
+    "grammar": 0,
+    "vocabulary": 0,
+    "relevance": 0,
+    "fluency": 0
+  }
+}
+Scores must be integers from 0 to 100. Judge language from the transcript only; do not claim to assess pronunciation or audio quality.
+The session lasts at most ${MAX_TURNS} learner turns. On the final turn, close the conversation naturally instead of asking another question and set complete to true. After other learner turns, reply naturally to what they said and ask one relevant follow-up question unless the conversation has already reached a natural ending. Hints should contain up to two short, relevant example answers for the learner's next turn.`;
+
+function isScore(value) {
+  return Number.isInteger(value) && value >= 0 && value <= 100;
+}
+
+function parseTurn(text, isOpening) {
+  let turn;
+  try {
+    const json = text.replace(/^```(?:json)?\s*|\s*```$/g, "");
+    turn = JSON.parse(json);
+  } catch {
+    throw new Error("Gemini mengirim jawaban dengan format yang tidak bisa dibaca. Coba lagi.");
+  }
+
+  if (
+    !turn ||
+    typeof turn.reply !== "string" ||
+    !turn.reply.trim() ||
+    typeof turn.complete !== "boolean" ||
+    !Array.isArray(turn.hints) ||
+    turn.hints.some((hint) => typeof hint !== "string")
+  ) {
+    throw new Error("Gemini mengirim jawaban yang belum lengkap. Coba lagi.");
+  }
+  const hints = turn.hints.map((hint) => hint.trim()).filter(Boolean).slice(0, 2);
+
+  if (isOpening) {
+    return {
+      reply: turn.reply.trim(),
+      hints,
+      complete: false,
+      evaluation: null,
+    };
+  }
+
+  const evaluation = turn.evaluation;
+  if (
+    !evaluation ||
+    !QUALITY_VALUES.includes(evaluation.quality) ||
+    !(evaluation.tag === null || MISTAKE_TAGS.includes(evaluation.tag)) ||
+    typeof evaluation.correction !== "string" ||
+    !evaluation.correction.trim() ||
+    !evaluation.scores ||
+    !SCORE_KEYS.every((key) => isScore(evaluation.scores[key]))
+  ) {
+    throw new Error("Gemini mengirim evaluasi yang belum lengkap. Coba kirim jawaban lagi.");
+  }
+
+  return {
+    reply: turn.reply.trim(),
+    hints,
+    complete: turn.complete,
+    evaluation: {
+      quality: evaluation.quality,
+      tag: evaluation.tag,
+      correction: evaluation.correction.trim(),
+      scores: Object.fromEntries(SCORE_KEYS.map((key) => [key, evaluation.scores[key]])),
+    },
+  };
+}
+
+export function isGeminiConfigured() {
+  return Boolean(API_KEY);
+}
+
+export async function generateConversationTurn(scenario, thread) {
+  if (!API_KEY) {
+    throw new Error("Tambahkan VITE_GEMINI_API_KEY ke file .env lalu jalankan ulang aplikasi.");
+  }
+
+  const isOpening = thread.length === 0;
+  const contents = isOpening
+    ? [{
+        role: "user",
+        parts: [{
+          text: `Start a conversation for this scenario:\nWorld: ${scenario.world}\nLocation: ${scenario.location}\nSituation: ${scenario.tagline}\nLearner level: ${scenario.difficulty}\nPartner role: ${scenario.role}`,
+        }],
+      }]
+    : thread.map((message) => ({
+        role: message.from === "ai" ? "model" : "user",
+        parts: [{ text: message.text }],
+      }));
+
+  const response = await fetch(
+    `${API_URL}/${encodeURIComponent(MODEL)}:generateContent?key=${encodeURIComponent(API_KEY)}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
+        contents,
+        generationConfig: { temperature: 0.7, responseMimeType: "application/json" },
+      }),
+    }
+  );
+
+  let payload;
+  try {
+    payload = await response.json();
+  } catch {
+    throw new Error(`Respons Gemini tidak dapat dibaca (HTTP ${response.status}).`);
+  }
+  if (!response.ok) {
+    throw new Error(
+      payload.error?.message || `Gemini API gagal merespons (HTTP ${response.status}).`
+    );
+  }
+
+  const generatedText = payload.candidates?.[0]?.content?.parts
+    ?.map((part) => part.text || "")
+    .join("")
+    .trim();
+
+  if (!generatedText) {
+    throw new Error("Gemini tidak mengirim respons. Coba lagi.");
+  }
+
+  const learnerTurns = thread.filter((message) => message.from === "user").length;
+  const turn = parseTurn(generatedText, isOpening);
+  return {
+    ...turn,
+    complete: !isOpening && learnerTurns >= MAX_TURNS ? true : turn.complete,
+  };
+}

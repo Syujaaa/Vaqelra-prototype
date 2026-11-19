@@ -7,8 +7,7 @@
     "location": "Ruang Kelas 204, Global State University",
     "difficulty": "Beginner",
     "estMinutes": 8,
-    "accent": "teal",
-    "missionId": "campus-presentation"
+    "accent": "teal"
   },
   {
     "id": "first-job",
@@ -18,8 +17,7 @@
     "location": "Lobi Kantor Nexora Tech",
     "difficulty": "Intermediate",
     "estMinutes": 10,
-    "accent": "amber",
-    "missionId": "job-interview"
+    "accent": "amber"
   },
   {
     "id": "travel-adventure",
@@ -29,8 +27,7 @@
     "location": "Terminal 3, Heathrow Airport",
     "difficulty": "Beginner",
     "estMinutes": 6,
-    "accent": "teal",
-    "missionId": "airport-checkin"
+    "accent": "teal"
   },
   {
     "id": "social-life",
@@ -40,8 +37,7 @@
     "location": "Rooftop Meetup, Brooklyn",
     "difficulty": "Beginner",
     "estMinutes": 7,
-    "accent": "flag",
-    "missionId": "new-friend"
+    "accent": "flag"
   },
   {
     "id": "business-world",
@@ -51,7 +47,6 @@
     "location": "Ruang Rapat, Meridian Capital",
     "difficulty": "Advanced",
     "estMinutes": 12,
-    "accent": "amber",
-    "missionId": "client-negotiation"
+    "accent": "amber"
   }
 ]

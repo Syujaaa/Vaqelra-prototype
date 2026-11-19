@@ -1,5 +1,4 @@
-// Tipis-tipis wrapper di atas Web Speech API bawaan browser.
-// Tidak ada backend/API key: semua STT (mic) dan TTS (suara AI) jalan di browser.
+// Wrapper Web Speech API untuk STT dan TTS; percakapan Gemini ditangani terpisah.
 
 export function isRecognitionSupported() {
   return typeof window !== "undefined" && !!(window.SpeechRecognition || window.webkitSpeechRecognition);

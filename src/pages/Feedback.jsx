@@ -5,8 +5,9 @@ import { ActionLink, PageContainer, PageTitle, SectionTitle } from "../component
 const scoreLabels = {
   grammar: "Grammar",
   vocabulary: "Vocabulary",
-  pronunciation: "Pronunciation",
+  relevance: "Relevansi",
   fluency: "Fluency",
+  pronunciation: "Pronunciation",
 };
 
 const qualityLabel = {
@@ -39,17 +40,16 @@ export default function Feedback() {
   }
 
   const { scenario, scores, mistakes, turns, corrections = [] } = data;
-  const overall = Math.round(
-    (scores.grammar + scores.vocabulary + scores.pronunciation + scores.fluency) / 4
-  );
+  const scoreValues = Object.values(scores);
+  const overall = Math.round(scoreValues.reduce((total, score) => total + score, 0) / scoreValues.length);
 
   return (
     <PageContainer size="content" className="py-12 sm:py-16">
       <p className="text-sm text-teal">{scenario.world}</p>
       <PageTitle className="mt-3">Catatan setelah percakapan</PageTitle>
       <p className="text-muted text-sm mt-3">
-        {turns} jawaban ditinjau dari percakapan dengan {scenario.role}. Nilai dibuat dengan
-        penilaian prototipe sederhana.
+        {turns} jawaban ditinjau Gemini dari percakapan dengan {scenario.role}. Penilaian dibuat
+        berdasarkan transkrip teks, pronunciation tidak dinilai.
       </p>
 
       <div className="grid lg:grid-cols-[0.7fr_1.3fr] gap-8 lg:gap-16 mt-10 sm:mt-14">

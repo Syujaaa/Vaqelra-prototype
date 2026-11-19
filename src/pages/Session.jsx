@@ -14,9 +14,8 @@ import {
   Send,
 } from "lucide-react";
 import scenarios from "../data/scenarios.json";
-import conversations from "../data/conversations.json";
 import { useApp } from "../context/AppContext";
-import { evaluateAnswer } from "../utils/evaluate";
+import { generateConversationTurn, isGeminiConfigured } from "../utils/gemini";
 import {
   createRecognizer,
   isRecognitionSupported,
@@ -30,31 +29,14 @@ const accentText = { teal: "text-teal", amber: "text-amber", flag: "text-flag" }
 const accentBg = { teal: "bg-teal", amber: "bg-amber", flag: "bg-flag" };
 const accentRing = { teal: "text-teal", amber: "text-amber", flag: "text-flag" };
 const accentBorder = { teal: "border-teal", amber: "border-amber", flag: "border-flag" };
+const MAX_TURNS = 5;
+const SCORE_KEYS = ["grammar", "vocabulary", "relevance", "fluency"];
 
 const qualityLabel = {
   strong: { text: "Jawaban kuat", tone: "text-teal" },
   ok: { text: "Cukup, bisa dilengkapi", tone: "text-amber" },
   weak: { text: "Perlu diperbaiki", tone: "text-flag" },
 };
-
-function scoreFromQuality(history) {
-  const weights = { strong: 92, ok: 74, weak: 52 };
-  const base = { grammar: [], vocabulary: [], pronunciation: [], fluency: [] };
-  history.forEach(({ quality, tag }) => {
-    const v = weights[quality] ?? 70;
-    base.grammar.push(tag === "tense" || tag === "grammar" ? v - 8 : v);
-    base.vocabulary.push(tag === "vocabulary" || tag === "repetition" ? v - 8 : v);
-    base.pronunciation.push(v - (tag === "pause" ? 6 : 0));
-    base.fluency.push(tag === "pause" || tag === "short-answer" ? v - 10 : v);
-  });
-  const avg = (arr) => Math.max(30, Math.min(99, Math.round(arr.reduce((a, b) => a + b, 0) / arr.length)));
-  return {
-    grammar: avg(base.grammar),
-    vocabulary: avg(base.vocabulary),
-    pronunciation: avg(base.pronunciation),
-    fluency: avg(base.fluency),
-  };
-}
 
 function estimateSpeakingMs(text) {
   const words = text.trim().split(/\s+/).filter(Boolean).length;
@@ -73,7 +55,6 @@ export default function Session() {
   const { recordSession } = useApp();
 
   const scenario = scenarios.find((s) => s.id === id);
-  const script = scenario ? conversations[scenario.missionId] : null;
 
   const [phase, setPhase] = useState("briefing"); // briefing | call | ended
   const [turn, setTurn] = useState("ai"); // ai | awaiting | listening | reviewing
@@ -81,10 +62,14 @@ export default function Session() {
   const [caption, setCaption] = useState(null); // {speaker, text, verdict?}
   const [liveText, setLiveText] = useState("");
   const [thread, setThread] = useState([]); // silent transcript log
-  const [history, setHistory] = useState([]); // {quality, tag, text, correction}
+  const [history, setHistory] = useState([]);
+  const [hints, setHints] = useState([]);
 
   const [voiceOn, setVoiceOn] = useState(true);
   const [micError, setMicError] = useState("");
+  const [geminiError, setGeminiError] = useState("");
+  const [pendingAnswer, setPendingAnswer] = useState("");
+  const [isConnecting, setIsConnecting] = useState(false);
   const [showHints, setShowHints] = useState(false);
   const [showTranscript, setShowTranscript] = useState(false);
   const [typedMode, setTypedMode] = useState(false);
@@ -96,11 +81,11 @@ export default function Session() {
   const shouldContinueListeningRef = useRef(false);
   const fallbackTimerRef = useRef(null);
   const turnRef = useRef(turn);
+  const endingRef = useRef(false);
   const speechSupported = isRecognitionSupported();
   const voiceSupported = isSynthesisSupported();
 
-  const totalSteps = script?.steps.length ?? 0;
-  const currentStep = script?.steps[stepIndex];
+  const totalSteps = MAX_TURNS;
   const accent = scenario ? scenario.accent : "teal";
 
   // Call timer.
@@ -136,7 +121,7 @@ export default function Session() {
     };
   }, []);
 
-  if (!scenario || !script) {
+  if (!scenario) {
     return (
       <div className="max-w-2xl mx-auto px-5 py-20 text-center">
         <p className="text-muted">Skenario tidak ditemukan.</p>
@@ -147,7 +132,17 @@ export default function Session() {
     );
   }
 
-  function goToAiLine(text) {
+  function onAiLineEnd() {
+    if (endingRef.current) {
+      setPhase("ended");
+      setTurn("awaiting");
+      return;
+    }
+    setTurn((currentTurn) => (currentTurn === "ai" ? "awaiting" : currentTurn));
+  }
+
+  function goToAiLine(text, ending = false) {
+    endingRef.current = ending;
     setCaption({ speaker: "ai", text });
     setTurn("ai");
     setThread((t) => [...t, { from: "ai", text }]);
@@ -159,11 +154,11 @@ export default function Session() {
     if (voiceOn && voiceSupported) {
       speak(text, {
         rate: 0.98,
-        onEnd: () => setTurn((t) => (t === "ai" ? "awaiting" : t)),
+        onEnd: onAiLineEnd,
       });
     } else {
       fallbackTimerRef.current = setTimeout(() => {
-        setTurn((t) => (t === "ai" ? "awaiting" : t));
+        onAiLineEnd();
       }, estimateSpeakingMs(text));
     }
   }
@@ -171,16 +166,27 @@ export default function Session() {
   function stopAiSpeech() {
     stopSpeaking();
     if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
-    setTurn((currentTurn) => (currentTurn === "ai" ? "awaiting" : currentTurn));
+    onAiLineEnd();
   }
 
-  function startSession() {
-    setPhase("call");
+  async function startSession() {
+    setIsConnecting(true);
+    setGeminiError("");
+    endingRef.current = false;
     setElapsed(0);
-    goToAiLine(script.opening);
+    try {
+      const opening = await generateConversationTurn(scenario, []);
+      setPhase("call");
+      setHints(opening.hints);
+      goToAiLine(opening.reply);
+    } catch (error) {
+      setGeminiError(error.message || "Tidak bisa memulai percakapan Gemini.");
+    } finally {
+      setIsConnecting(false);
+    }
   }
 
-  function finalizeAnswer(rawText) {
+  async function processAnswer(rawText, appendToThread = true) {
     const text = rawText.trim();
     if (!text) {
       setTurn("awaiting");
@@ -188,33 +194,37 @@ export default function Session() {
       return;
     }
     setMicError("");
-    const evalResult = evaluateAnswer(text, currentStep.options);
-    const correction = evalResult.quality === "strong"
-      ? "Jawabanmu sudah jelas dan natural."
-      : currentStep.options.find((option) => option.quality === "strong")?.text;
-
-    setCaption({ speaker: "user", text, verdict: evalResult.quality });
-    setThread((t) => [...t, { from: "user", text, verdict: evalResult.quality }]);
-    setHistory((h) => [
-      ...h,
-      { quality: evalResult.quality, tag: evalResult.tag, text, correction },
-    ]);
+    setGeminiError("");
+    const nextThread = appendToThread ? [...thread, { from: "user", text }] : thread;
+    if (appendToThread) setThread(nextThread);
+    setPendingAnswer(text);
+    setCaption({ speaker: "user", text });
     setTurn("reviewing");
     setTypedMode(false);
     setTypedDraft("");
+    setShowHints(false);
 
-    const nextAiLine = currentStep.aiReply;
-    const nextIndex = stepIndex + 1;
+    try {
+      const response = await generateConversationTurn(scenario, nextThread);
+      const nextHistory = [...history, {
+        ...response.evaluation,
+        text,
+      }];
+      const ending = response.complete || nextHistory.length >= MAX_TURNS;
+      setHistory(nextHistory);
+      setPendingAnswer("");
+      setHints(response.hints);
+      setStepIndex(nextHistory.length);
+      setCaption({ speaker: "user", text, verdict: response.evaluation.quality });
+      goToAiLine(response.reply, ending);
+    } catch (error) {
+      setTurn("awaiting");
+      setGeminiError(error.message || "Gemini gagal menilai jawabanmu. Coba lagi.");
+    }
+  }
 
-    setTimeout(() => {
-      setStepIndex(nextIndex);
-      if (nextIndex >= totalSteps || !nextAiLine) {
-        stopSpeaking();
-        setPhase("ended");
-      } else {
-        goToAiLine(nextAiLine);
-      }
-    }, 1500);
+  function finalizeAnswer(rawText) {
+    processAnswer(rawText);
   }
 
   function beginListening() {
@@ -286,7 +296,12 @@ export default function Session() {
   }
 
   function finishSession() {
-    const scores = scoreFromQuality(history);
+    const scores = Object.fromEntries(
+      SCORE_KEYS.map((key) => [
+        key,
+        Math.round(history.reduce((total, item) => total + item.scores[key], 0) / history.length),
+      ])
+    );
     const mistakes = [...new Set(history.map((h) => h.tag).filter(Boolean))];
     const corrections = history.map(({ text, quality, tag, correction }) => ({ text, quality, tag, correction }));
     recordSession({ scenarioId: scenario.id, world: scenario.world, scores, mistakes, corrections });
@@ -294,16 +309,16 @@ export default function Session() {
   }
 
   const statusText = {
-    ai: `${script.character} sedang berbicara…`,
+    ai: `${scenario.role} sedang berbicara…`,
     awaiting: "Giliranmu, tekan mic dan bicara",
     listening: "Mendengarkan… tekan lagi untuk berhenti",
-    reviewing: "Menilai jawabanmu…",
+    reviewing: "Gemini sedang menyiapkan respons…",
   }[turn];
 
   return (
     <PageContainer size="narrow" className="py-8 min-h-[calc(100vh-4rem)] flex flex-col">
       {phase !== "briefing" && (
-        <h1 className="sr-only">Sesi latihan bersama {script.character}</h1>
+        <h1 className="sr-only">Sesi latihan bersama {scenario.role}</h1>
       )}
       {/* Top bar */}
       <div className="flex items-center justify-between">
@@ -353,23 +368,37 @@ export default function Session() {
             <PageTitle size="compact" className="mt-2">{scenario.world}</PageTitle>
             <p className="text-muted text-sm mt-2">{scenario.location}</p>
             <p className="mt-5 leading-relaxed">{scenario.tagline}</p>
+            <p className="text-xs text-muted mt-4">
+              Transkrip jawaban dikirim langsung ke Gemini untuk membuat respons dan evaluasi.
+            </p>
 
             <div className="mt-6 flex items-center gap-3 rounded-md bg-ink-950 border border-ink-800 p-4">
               <span className="w-10 h-10 rounded-full bg-teal/15 grid place-items-center text-teal shrink-0">
-                {script.character.charAt(0)}
+                {scenario.role.charAt(0)}
               </span>
               <div>
-                <p className="text-sm">{script.character}</p>
-                <p className="text-xs text-muted">{script.characterRole}</p>
+                <p className="text-sm">Partner percakapan</p>
+                <p className="text-xs text-muted">{scenario.role}</p>
               </div>
             </div>
 
+            {!isGeminiConfigured() && (
+              <p className="text-sm text-flag mt-5" role="alert">
+                Isi VITE_GEMINI_API_KEY di file .env lalu jalankan ulang aplikasi untuk memakai
+                percakapan Gemini.
+              </p>
+            )}
+            {geminiError && (
+              <p className="text-sm text-flag mt-5" role="alert">{geminiError}</p>
+            )}
             <button
               type="button"
               onClick={startSession}
-              className="mt-8 inline-flex min-h-11 items-center gap-2 bg-amber text-white px-5 py-3 rounded-sm text-sm font-medium hover:bg-amber-soft"
+              disabled={!isGeminiConfigured() || isConnecting}
+              className="mt-8 inline-flex min-h-11 items-center gap-2 bg-amber text-white px-5 py-3 rounded-sm text-sm font-medium hover:bg-amber-soft disabled:opacity-60"
             >
-              <Mic size={16} aria-hidden="true" /> Mulai percakapan suara
+              <Mic size={16} aria-hidden="true" />
+              {isConnecting ? "Menghubungkan ke Gemini..." : "Mulai percakapan suara"}
             </button>
             <p className="text-xs text-muted mt-3">
               {speechSupported
@@ -417,11 +446,11 @@ export default function Session() {
                   turn === "listening" ? "border-flag text-flag" : `${accentBorder[accent]} ${accentText[accent]}`
                 } bg-ink-900`}
               >
-                {script.character.charAt(0)}
+                {scenario.role.charAt(0)}
               </div>
             </div>
-            <p className="text-sm mt-4">{script.character}</p>
-            <p className="text-xs text-muted">{script.characterRole}</p>
+            <p className="text-sm mt-4">Partner percakapan</p>
+            <p className="text-xs text-muted">{scenario.role}</p>
           </div>
 
           {/* Equalizer */}
@@ -459,6 +488,18 @@ export default function Session() {
 
           <p className="text-xs text-muted mb-4" aria-live="polite">{statusText}</p>
           {micError && <p className="text-xs text-flag mb-3 text-center max-w-sm">{micError}</p>}
+          {geminiError && (
+            <div className="mb-4 text-center" role="alert">
+              <p className="text-xs text-flag mb-2">{geminiError}</p>
+              <button
+                type="button"
+                onClick={() => processAnswer(pendingAnswer, false)}
+                className="min-h-11 px-3 text-xs border border-flag text-flag hover:bg-flag/10 rounded-sm"
+              >
+                Coba lagi
+              </button>
+            </div>
+          )}
 
           {/* Typed fallback input */}
           {typedMode && turn === "awaiting" && (
@@ -490,14 +531,14 @@ export default function Session() {
           {/* Hint sheet */}
           {showHints && turn === "awaiting" && (
             <div className="w-full grid gap-2 mb-4">
-              {currentStep.options.map((opt, i) => (
+              {hints.map((hint, i) => (
                 <button
                   type="button"
                   key={i}
-                  onClick={() => applyHint(opt.text)}
+                  onClick={() => applyHint(hint)}
                   className="text-left text-sm bg-ink-900 border border-ink-700 hover:border-teal rounded-sm px-3 py-3 transition-colors"
                 >
-                  {opt.text}
+                  {hint}
                 </button>
               ))}
             </div>
@@ -505,23 +546,25 @@ export default function Session() {
 
           {/* Controls */}
           <div className="flex items-center justify-center gap-6">
-            <button
-              type="button"
-              onClick={() => setShowHints((v) => !v)}
-              disabled={turn !== "awaiting"}
-              className="w-11 h-11 rounded-sm grid place-items-center border border-ink-700 text-muted hover:text-ivory disabled:opacity-50"
-              title="Contoh jawaban"
-              aria-label="Tampilkan contoh jawaban"
-              aria-expanded={showHints}
-            >
-              <Lightbulb size={16} aria-hidden="true" />
-            </button>
+            {hints.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowHints((v) => !v)}
+                disabled={turn !== "awaiting" || Boolean(geminiError)}
+                className="w-11 h-11 rounded-sm grid place-items-center border border-ink-700 text-muted hover:text-ivory disabled:opacity-50"
+                title="Contoh jawaban"
+                aria-label="Tampilkan contoh jawaban"
+                aria-expanded={showHints}
+              >
+                <Lightbulb size={16} aria-hidden="true" />
+              </button>
+            )}
 
             {!typedMode ? (
               <button
                 type="button"
                 onClick={turn === "listening" ? stopListening : beginListening}
-                disabled={turn === "ai" || turn === "reviewing"}
+                disabled={turn === "ai" || turn === "reviewing" || Boolean(geminiError)}
                 className={`w-16 h-16 rounded-full grid place-items-center transition-colors ${
                   turn === "listening"
                     ? "bg-flag text-white"
@@ -541,7 +584,7 @@ export default function Session() {
               <button
                 type="button"
                 onClick={() => setTypedMode((v) => !v)}
-                disabled={turn !== "awaiting"}
+                disabled={turn !== "awaiting" || Boolean(geminiError)}
                 className="w-11 h-11 rounded-sm grid place-items-center border border-ink-700 text-muted hover:text-ivory disabled:opacity-50"
                 title="Ketik alih-alih bicara"
                 aria-label="Beralih ke mode mengetik"
@@ -552,7 +595,8 @@ export default function Session() {
               <button
                 type="button"
                 onClick={endCallEarly}
-                className="w-11 h-11 rounded-sm grid place-items-center border border-ink-700 text-flag hover:bg-flag/10"
+                disabled={turn === "reviewing"}
+                className="w-11 h-11 rounded-sm grid place-items-center border border-ink-700 text-flag hover:bg-flag/10 disabled:opacity-50"
                 title="Akhiri sesi"
                 aria-label="Akhiri sesi"
               >
@@ -565,7 +609,8 @@ export default function Session() {
             <button
               type="button"
               onClick={endCallEarly}
-              className="mt-5 inline-flex min-h-11 items-center gap-1.5 text-xs text-muted hover:text-flag"
+              disabled={turn === "reviewing"}
+              className="mt-5 inline-flex min-h-11 items-center gap-1.5 text-xs text-muted hover:text-flag disabled:opacity-50"
             >
               <PhoneOff size={12} aria-hidden="true" /> Akhiri sesi
             </button>
@@ -589,7 +634,7 @@ export default function Session() {
             {thread.map((msg, i) => (
               <div key={i} className={`text-sm ${msg.from === "user" ? "text-right" : "text-left"}`}>
                 <p className="text-[11px] text-muted mb-0.5">
-                  {msg.from === "user" ? "Kamu" : script.character}
+                  {msg.from === "user" ? "Kamu" : "Partner"}
                 </p>
                 <p>{msg.text}</p>
               </div>
@@ -604,7 +649,7 @@ export default function Session() {
           <div className="w-full border border-ink-700 bg-ink-900 p-8 text-center">
             <h2 className="font-display text-2xl">Sesi selesai!</h2>
             <p className="text-muted text-sm mt-2">
-              Percakapan dengan {script.character} berlangsung {formatClock(elapsed)}. Lihat evaluasi speaking-mu.
+              Percakapan dengan partner latihan berlangsung {formatClock(elapsed)}. Lihat evaluasi speaking-mu.
             </p>
             <button
               onClick={finishSession}

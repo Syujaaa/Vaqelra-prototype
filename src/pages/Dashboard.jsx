@@ -75,9 +75,8 @@ export default function Dashboard() {
           ) : (
             <ul className="mt-4">
               {progress.completedSessions.map((session, index) => {
-                const avg = Math.round(
-                  (session.scores.grammar + session.scores.vocabulary + session.scores.pronunciation + session.scores.fluency) / 4
-                );
+                const values = Object.values(session.scores);
+                const avg = Math.round(values.reduce((total, score) => total + score, 0) / values.length);
                 const sessionId = session.id || `legacy-${index}`;
                 return (
                   <li key={sessionId} className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 border-t border-ink-700 py-3">

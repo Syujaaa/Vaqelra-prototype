@@ -29,9 +29,8 @@ export function AppProvider({ children }) {
 
   function recordSession({ scenarioId, world, scores, mistakes, corrections = [] }) {
     setProgress((prev) => {
-      const earnedXp = Math.round(
-        (scores.grammar + scores.vocabulary + scores.pronunciation + scores.fluency) / 4 * 0.6
-      );
+      const scoreValues = Object.values(scores);
+      const earnedXp = Math.round(scoreValues.reduce((total, score) => total + score, 0) / scoreValues.length * 0.6);
       let xp = prev.xp + earnedXp;
       let level = prev.level;
       let xpToNextLevel = prev.xpToNextLevel;

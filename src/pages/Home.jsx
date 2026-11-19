@@ -25,8 +25,8 @@ export default function Home() {
           </PageTitle>
           <p className="text-muted mt-6 text-base sm:text-lg leading-relaxed max-w-xl">
             Pilih sebuah situasi, jawab dengan suara atau teks, lalu tinjau catatan
-            latihanmu. Skenario percakapan dan evaluasi di Vaqelra masih berupa
-            prototipe berbasis naskah.
+            latihanmu. Gemini membuat percakapan dan menilai jawaban dari transkrip
+            teks.
           </p>
           <div className="flex flex-wrap items-center gap-3 mt-8">
             <ActionLink
@@ -69,7 +69,7 @@ export default function Home() {
             <SectionTitle className="sm:text-4xl">Pilih suasana latihanmu.</SectionTitle>
             <p className="text-muted text-sm mt-4 leading-relaxed max-w-sm">
               Mulai dari ruang kelas sampai percakapan kerja. Setiap skenario
-              memiliki konteks dan naskah percakapan sendiri.
+              memberi konteks agar dialog Gemini terasa sesuai situasi.
             </p>
             <ActionLink
               to="/worlds"
@@ -95,9 +95,9 @@ export default function Home() {
         <PageContainer className="grid gap-3 py-8 sm:grid-cols-[10rem_1fr] sm:gap-8 sm:py-10">
           <SectionTitle size="small">Catatan prototipe</SectionTitle>
           <p className="text-sm text-muted leading-relaxed max-w-3xl">
-            Sesi latihan memakai percakapan contoh dan penilaian sederhana, bukan
-            model AI atau layanan evaluasi pengucapan. Riwayat disimpan di browser
-            yang sedang digunakan.
+            Ini prototipe tanpa backend. Transkrip dikirim ke Gemini untuk dialog
+            dan evaluasi; nilai pronunciation tidak tersedia. Riwayat disimpan di
+            browser yang sedang digunakan.
           </p>
         </PageContainer>
       </section>
