@@ -55,7 +55,7 @@ npm run preview
 - `src/utils/gemini.js` — panggilan Gemini dari browser untuk menghasilkan dialog, contoh
   jawaban, dan evaluasi berdasarkan transkrip.
 - `src/context/AppContext.jsx` — state global (progress, XP, riwayat sesi, frekuensi
-  kesalahan), tersimpan ke `localStorage`.
+  kesalahan, transkrip percakapan), tersimpan ke `localStorage`.
 - `src/pages/` — Home, Worlds (pilih dunia), Session (percakapan), Feedback (evaluasi
   per sesi), Dashboard (progress & pola kesalahan), Pricing.
 

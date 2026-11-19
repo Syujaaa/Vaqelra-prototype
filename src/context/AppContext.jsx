@@ -27,7 +27,7 @@ export function AppProvider({ children }) {
     }
   }, [progress]);
 
-  function recordSession({ scenarioId, world, scores, mistakes, corrections = [] }) {
+  function recordSession({ scenarioId, world, scores, mistakes, corrections = [], transcript = [] }) {
     setProgress((prev) => {
       const scoreValues = Object.values(scores);
       const earnedXp = Math.round(scoreValues.reduce((total, score) => total + score, 0) / scoreValues.length * 0.6);
@@ -47,6 +47,7 @@ export function AppProvider({ children }) {
         scores,
         mistakes,
         corrections,
+        transcript,
       };
       return {
         ...prev,

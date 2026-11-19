@@ -343,8 +343,21 @@ export default function Session() {
       ])
     );
     const mistakes = [...new Set(history.map((h) => h.tag).filter(Boolean))];
-    const corrections = history.map(({ text, quality, tag, correction }) => ({ text, quality, tag, correction }));
-    recordSession({ scenarioId: scenario.id, world: scenario.world, scores, mistakes, corrections });
+    const corrections = history.map(({ text, quality, tag, correction, scores: turnScores }) => ({
+      text,
+      quality,
+      tag,
+      correction,
+      scores: turnScores,
+    }));
+    recordSession({
+      scenarioId: scenario.id,
+      world: scenario.world,
+      scores,
+      mistakes,
+      corrections,
+      transcript: thread,
+    });
     navigate("/feedback", { state: { scenario, scores, mistakes, turns: history.length, corrections } });
   }
 

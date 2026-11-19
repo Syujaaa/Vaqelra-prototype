@@ -3,6 +3,100 @@ import { useApp } from "../context/AppContext";
 import mistakeTags from "../data/mistakeTags.json";
 import { ActionLink, PageContainer, PageTitle, SectionTitle } from "../components/ui";
 
+const scoreLabels = {
+  grammar: "Grammar",
+  vocabulary: "Vocabulary",
+  relevance: "Relevansi",
+  fluency: "Fluency",
+  pronunciation: "Pronunciation",
+};
+
+const qualityLabels = {
+  strong: "Jawaban kuat",
+  ok: "Bisa dilengkapi",
+  weak: "Perlu diperbaiki",
+};
+
+function SessionDetails({ session }) {
+  const transcript = Array.isArray(session.transcript) ? session.transcript : [];
+  const corrections = Array.isArray(session.corrections) ? session.corrections : [];
+  const scores = Object.entries(session.scores || {});
+
+  return (
+    <details className="col-span-3 w-full">
+      <summary className="inline-flex min-h-11 items-center text-sm text-teal underline underline-offset-4">
+        Lihat riwayat lengkap
+      </summary>
+      <div className="mt-2 space-y-5 border-l-2 border-teal pl-4">
+        <section>
+          <h3 className="text-xs text-muted">Nilai sesi</h3>
+          <dl className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {scores.map(([key, value]) => (
+              <div key={key}>
+                <dt className="text-xs text-muted">{scoreLabels[key] || key}</dt>
+                <dd className="font-display text-xl">{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+
+        <section>
+          <h3 className="text-xs text-muted">Transkrip percakapan</h3>
+          {transcript.length > 0 ? (
+            <ol className="mt-2 space-y-3">
+              {transcript.map((message, messageIndex) => (
+                <li key={`${message.from}-${messageIndex}`} className="text-sm">
+                  <p className="text-xs text-muted mb-1">
+                    {message.from === "user" ? "Kamu" : "Partner latihan"}
+                  </p>
+                  <p className="break-words">{message.text}</p>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="mt-2 text-sm text-muted">
+              Transkrip tidak tersedia untuk sesi contoh atau sesi lama ini.
+            </p>
+          )}
+        </section>
+
+        {corrections.length > 0 && (
+          <section>
+            <h3 className="text-xs text-muted">Catatan jawaban</h3>
+            <ol className="mt-2 space-y-3">
+              {corrections.map((item, itemIndex) => (
+                <li key={`correction-${itemIndex}`} className="border-t border-ink-700 pt-3">
+                  <div className="flex flex-wrap justify-between gap-2 text-xs">
+                    <span className="text-muted">Jawaban {itemIndex + 1}</span>
+                    <span>{qualityLabels[item.quality] || item.quality}</span>
+                  </div>
+                  <p className="mt-1 break-words text-sm">{item.text}</p>
+                  {item.correction && (
+                    <p className="mt-1 break-words text-sm text-teal">{item.correction}</p>
+                  )}
+                  {item.scores && (
+                    <dl className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                      {Object.entries(item.scores).map(([key, value]) => (
+                        <div key={key}>
+                          <dt className="text-xs text-muted">{scoreLabels[key] || key}</dt>
+                          <dd className="text-sm">{value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  )}
+                  {item.tag && mistakeTags[item.tag] && (
+                    <p className="mt-1 text-xs text-muted">{mistakeTags[item.tag].detail}</p>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
+      </div>
+    </details>
+  );
+}
+
 export default function Dashboard() {
   const { progress, deleteSession, resetProgress, mistakeFrequency } = useApp();
 
@@ -75,8 +169,10 @@ export default function Dashboard() {
           ) : (
             <ul className="mt-4">
               {progress.completedSessions.map((session, index) => {
-                const values = Object.values(session.scores);
-                const avg = Math.round(values.reduce((total, score) => total + score, 0) / values.length);
+                const values = Object.values(session.scores || {});
+                const avg = values.length
+                  ? Math.round(values.reduce((total, score) => total + score, 0) / values.length)
+                  : 0;
                 const sessionId = session.id || `legacy-${index}`;
                 return (
                   <li key={sessionId} className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 border-t border-ink-700 py-3">
@@ -95,6 +191,7 @@ export default function Dashboard() {
                     >
                       <Trash2 size={16} aria-hidden="true" />
                     </button>
+                    <SessionDetails session={session} />
                   </li>
                 );
               })}
