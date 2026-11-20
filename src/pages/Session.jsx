@@ -427,9 +427,19 @@ export default function Session() {
             </p>
 
             <div className="mt-6 flex items-center gap-3 rounded-md bg-ink-950 border border-ink-800 p-4">
-              <span className="w-10 h-10 rounded-full bg-teal/15 grid place-items-center text-teal shrink-0">
-                {scenario.role.charAt(0)}
-              </span>
+              {scenario.profile ? (
+                <img
+                  src={scenario.profile}
+                  alt={`Partner percakapan untuk ${scenario.world}`}
+                  width="40"
+                  height="40"
+                  className="h-10 w-10 rounded-full object-cover border border-ink-700 shrink-0"
+                />
+              ) : (
+                <span className="w-10 h-10 rounded-full bg-teal/15 grid place-items-center text-teal shrink-0" aria-hidden="true">
+                  {scenario.role.charAt(0)}
+                </span>
+              )}
               <div>
                 <p className="text-sm">Partner percakapan</p>
                 <p className="text-xs text-muted">{scenario.role}</p>
@@ -494,13 +504,26 @@ export default function Session() {
                   <span className={`call-ring delay-2 ${accentRing[accent]}`} />
                 </>
               )}
-              <div
-                className={`absolute inset-0 rounded-full grid place-items-center font-display text-3xl border-2 ${
-                  turn === "listening" ? "border-flag text-flag" : `${accentBorder[accent]} ${accentText[accent]}`
-                } bg-ink-900`}
-              >
-                {scenario.role.charAt(0)}
-              </div>
+              {scenario.profile ? (
+                <img
+                  src={scenario.profile}
+                  alt={`Partner percakapan untuk ${scenario.world}`}
+                  width="112"
+                  height="112"
+                  className={`absolute inset-0 h-28 w-28 rounded-full object-cover border-2 ${
+                    turn === "listening" ? "border-flag" : accentBorder[accent]
+                  } bg-ink-900`}
+                />
+              ) : (
+                <div
+                  className={`absolute inset-0 rounded-full grid place-items-center font-display text-3xl border-2 ${
+                    turn === "listening" ? "border-flag text-flag" : `${accentBorder[accent]} ${accentText[accent]}`
+                  } bg-ink-900`}
+                  aria-hidden="true"
+                >
+                  {scenario.role.charAt(0)}
+                </div>
+              )}
             </div>
             <p className="text-sm mt-4">Partner percakapan</p>
             <p className="text-xs text-muted">{scenario.role}</p>

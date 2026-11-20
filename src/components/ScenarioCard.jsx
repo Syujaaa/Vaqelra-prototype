@@ -10,6 +10,15 @@ export default function ScenarioCard({ scenario, number }) {
         {number ?? "–"}
       </span>
       <div className="min-w-0">
+        {scenario.profile && (
+          <img
+            src={scenario.profile}
+            alt={`Partner percakapan untuk ${scenario.world}`}
+            width="96"
+            height="96"
+            className="float-right ml-4 mb-2 h-20 w-20 rounded-full object-cover border-2 border-ink-700 sm:h-24 sm:w-24"
+          />
+        )}
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
           <h2 className="font-display text-2xl group-hover:text-teal">{scenario.world}</h2>
           <span className="text-xs text-muted">
