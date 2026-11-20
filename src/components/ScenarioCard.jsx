@@ -12,7 +12,9 @@ export default function ScenarioCard({ scenario, number }) {
       <div className="min-w-0">
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
           <h2 className="font-display text-2xl group-hover:text-teal">{scenario.world}</h2>
-          <span className="text-xs text-muted">{scenario.difficulty} · {scenario.estMinutes} menit</span>
+          <span className="text-xs text-muted">
+            {scenario.category} · {scenario.difficulty} · {scenario.estMinutes} menit
+          </span>
         </div>
         <p className="text-sm text-muted mt-1">{scenario.role}</p>
         <p className="text-sm leading-relaxed mt-3">{scenario.tagline}</p>

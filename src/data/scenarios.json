@@ -2,6 +2,7 @@
   {
     "id": "campus-life",
     "world": "Campus Life",
+    "category": "Kampus",
     "role": "Dosen & teman kuliah",
     "tagline": "Presentasi tugas, diskusi kelompok, dan obrolan di kantin kampus internasional.",
     "location": "Ruang Kelas 204, Global State University",
@@ -12,6 +13,7 @@
   {
     "id": "first-job",
     "world": "First Job",
+    "category": "Karier",
     "role": "HRD & rekan kerja",
     "tagline": "Interview kerja, onboarding hari pertama, dan rapat kecil dengan atasan.",
     "location": "Lobi Kantor Nexora Tech",
@@ -22,6 +24,7 @@
   {
     "id": "travel-adventure",
     "world": "Travel Adventure",
+    "category": "Perjalanan",
     "role": "Petugas bandara & orang asing",
     "tagline": "Check-in bandara, tanya arah, dan basa-basi dengan sesama traveler.",
     "location": "Terminal 3, Heathrow Airport",
@@ -32,6 +35,7 @@
   {
     "id": "social-life",
     "world": "Social Life",
+    "category": "Sosial",
     "role": "Teman baru",
     "tagline": "Kenalan di acara komunitas dan menjaga obrolan tetap mengalir.",
     "location": "Rooftop Meetup, Brooklyn",
@@ -42,11 +46,23 @@
   {
     "id": "business-world",
     "world": "Business World",
+    "category": "Bisnis",
     "role": "Klien & partner bisnis",
     "tagline": "Negosiasi kontrak dan menjelaskan produk kepada calon klien.",
     "location": "Ruang Rapat, Meridian Capital",
     "difficulty": "Advanced",
     "estMinutes": 12,
     "accent": "amber"
+  },
+  {
+    "id": "daily-life",
+    "world": "Daily Life",
+    "category": "Umum",
+    "role": "Tetangga, pelayan, atau teman",
+    "tagline": "Berbincang santai tentang belanja, restoran, cuaca, jadwal, dan aktivitas harian.",
+    "location": "Warung, kafe, atau lingkungan sekitar",
+    "difficulty": "Beginner",
+    "estMinutes": 7,
+    "accent": "teal"
   }
 ]
