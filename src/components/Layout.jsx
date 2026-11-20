@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import { PageContainer } from "./ui";
+import CustomerSupport from "./CustomerSupport";
 
 const navItems = [
   { to: "/", label: "Beranda", end: true },
@@ -82,6 +83,7 @@ export default function Layout() {
           <p>Prototipe lokal. Data sesi tersimpan di browser.</p>
         </PageContainer>
       </footer>
+      <CustomerSupport />
     </div>
   );
 }

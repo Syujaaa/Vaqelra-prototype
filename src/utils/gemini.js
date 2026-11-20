@@ -1,4 +1,5 @@
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY?.trim();
+const API_KEY_PLACEHOLDER = "your_gemini_api_key";
 const MODEL = import.meta.env.VITE_GEMINI_MODEL?.trim() || "gemini-3.8-flash";
 const API_URL = "https://generativelanguage.googleapis.com/v1beta/models";
 const QUALITY_VALUES = ["strong", "ok", "weak"];
@@ -100,12 +101,74 @@ function parseTurn(text, isOpening) {
 }
 
 export function isGeminiConfigured() {
-  return Boolean(API_KEY);
+  return Boolean(API_KEY && API_KEY.toLowerCase() !== API_KEY_PLACEHOLDER);
+}
+
+export async function generateCustomerSupportReply(message, history) {
+  if (!isGeminiConfigured()) {
+    throw new Error("Layanan bantuan belum dikonfigurasi. Isi VITE_GEMINI_API_KEY dengan API key Gemini yang valid di file .env, lalu jalankan ulang aplikasi.");
+  }
+
+  const supportInstruction = `You are the customer support assistant for Vaqelra, an Indonesian English-practice app.
+Answer only questions about Vaqelra's practice scenarios, dialogue sessions, speech and text input, evaluation scores, mistake tags, progress, browser storage, pricing, API configuration, or application troubleshooting.
+Vaqelra is a local prototype. It has no backend, and session history is stored in the user's browser. Gemini generates dialogue and evaluation. Pronunciation cannot be assessed from text transcripts.
+Be concise, practical, and helpful. If you do not know an app-specific answer, say that the information is not available instead of inventing it.
+Respond in the same language as the user's question. Do not use markdown tables.`;
+
+  const contents = history.map((item) => ({
+    role: item.role === "assistant" ? "model" : "user",
+    parts: [{ text: item.text }],
+  }));
+  contents.push({
+    role: "user",
+    parts: [{ text: message }],
+  });
+
+  const response = await fetch(
+    `${API_URL}/${encodeURIComponent(MODEL)}:generateContent?key=${encodeURIComponent(API_KEY)}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: supportInstruction }] },
+        contents,
+        generationConfig: { temperature: 0.4 },
+      }),
+    }
+  );
+
+  let payload;
+  try {
+    payload = await response.json();
+  } catch {
+    throw new Error(`Respons layanan bantuan tidak dapat dibaca (HTTP ${response.status}).`);
+  }
+  if (!response.ok) {
+    const guidance = response.status === 401 || response.status === 403
+      ? "Periksa API key dan izinnya."
+      : response.status === 429
+      ? "Batas permintaan tercapai. Tunggu sebentar lalu coba lagi."
+      : "Periksa konfigurasi lalu coba lagi.";
+    const apiMessage = typeof payload?.error?.message === "string"
+      ? `Detail Gemini: ${payload.error.message}`
+      : guidance;
+    throw new Error(`Layanan bantuan gagal memproses permintaan (HTTP ${response.status}). ${apiMessage}`);
+  }
+
+  const reply = payload.candidates?.[0]?.content?.parts
+    ?.map((part) => part.text || "")
+    .join("")
+    .trim();
+
+  if (!reply) {
+    throw new Error("Layanan bantuan tidak mengirim respons. Coba lagi.");
+  }
+  return reply;
 }
 
 export async function generateConversationTurn(scenario, thread) {
-  if (!API_KEY) {
-    throw new Error("Tambahkan API key ke file .env lalu jalankan ulang aplikasi.");
+  if (!isGeminiConfigured()) {
+    throw new Error("Isi VITE_GEMINI_API_KEY dengan API key Gemini yang valid di file .env, lalu jalankan ulang aplikasi.");
   }
 
   const isOpening = thread.length === 0;
